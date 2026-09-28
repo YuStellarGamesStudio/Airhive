@@ -1,5 +1,6 @@
 import { GAME, WEAPONS, ENEMIES, BOSSES, FORMATIONS, MOTION, PICKUPS } from '../data/game.js';
 import { planWave, PLAN_STRIDE } from './wave-plan.js';
+import { planAttacks, hasAttack } from './attack-plan.js';
 
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 const overlaps = (a, b, scale = 1) => Math.abs(a.x - b.x) * 2 < a.w * scale + b.w &&
@@ -7,9 +8,16 @@ const overlaps = (a, b, scale = 1) => Math.abs(a.x - b.x) * 2 < a.w * scale + b.
 const TAU = Math.PI * 2;
 
 export class Game {
-  constructor({ random = Math.random, onEvent = () => {} } = {}) {
+  constructor({ random = Math.random, onEvent = () => {}, planWave: prepareWave = planWave,
+    planAttacks: prepareAttacks = null } = {}) {
     this.random = random;
     this.onEvent = onEvent;
+    this.planWave = prepareWave;
+    this.wavePlan = null;
+    this.prepareAttacks = prepareAttacks;
+    this.attackTargets = new Map();
+    this.stepEpoch = 0;
+    this.pendingUpdate = null;
     this.state = 'menu';
     this.time = 0;
     this.wave = 0;
@@ -69,12 +77,13 @@ export class Game {
     this.startWave(1);
   }
 
-  pause() { if (this.state === 'playing') this.state = 'paused'; }
+  pause() { if (this.state === 'playing') { this.state = 'paused'; this.stepEpoch++; } }
   resume() { if (this.state === 'paused') this.state = 'playing'; }
   togglePause() { if (this.state === 'paused') this.resume(); else this.pause(); }
 
   continueChallenge() {
     if (this.state !== 'death' || this.player.lives <= 0) return false;
+    this.stepEpoch++;
     this.player.hp = GAME.player.hp;
     this.player.active = true;
     this.player.invulnerable = GAME.player.reviveInvulnerability;
@@ -87,15 +96,15 @@ export class Game {
     return true;
   }
 
-
   startWave(number) {
     if (this.state !== 'playing' || !Number.isInteger(number) || number < 1) return;
+    this.stepEpoch++;
     this.wave = number;
     this.waveTime = 0;
     this.waveGap = 0;
     this.spawned = 0;
     this.nextSpawn = GAME.wave.initialDelay;
-    this.wavePlan = planWave(number);
+    this.wavePlan = this.planWave(number) ?? planWave(number);
     this.spawnCount = this.wavePlan.length / PLAN_STRIDE;
     this.waveBanner = GAME.wave.banner;
     this.enemies.length = this.obstacles.length = this.warnings.length = 0;
@@ -129,6 +138,7 @@ export class Game {
 
   update(dt, input = {}) {
     if (!Number.isFinite(dt) || dt <= 0) return;
+    if (this.pendingUpdate) return this.pendingUpdate;
     // A caller normally passes GAME.step; a long frame cannot skip collisions or timers.
     let remaining = Math.min(dt, GAME.step * GAME.maxStepsPerUpdate);
     if (this.state === 'dying') {
@@ -142,6 +152,10 @@ export class Game {
       return;
     }
     if (this.state !== 'playing') return;
+    if (this.prepareAttacks) {
+      this.pendingUpdate = this._updatePlanned(remaining, input).finally(() => { this.pendingUpdate = null; });
+      return this.pendingUpdate;
+    }
     while (remaining > 0 && this.state === 'playing') {
       const slice = Math.min(remaining, GAME.step);
       this._step(slice * (this.slowMotion > 0 ? GAME.wave.bossSlowFactor : 1), input);
@@ -151,6 +165,28 @@ export class Game {
   }
 
   _step(dt, input) {
+    this._beginStep(dt, input);
+    this._finishStep(dt, planAttacks(this._attackBatch()));
+  }
+
+  async _updatePlanned(remaining, input) {
+    while (remaining > 0 && this.state === 'playing') {
+      const epoch = this.stepEpoch;
+      const slice = Math.min(remaining, GAME.step);
+      const dt = slice * (this.slowMotion > 0 ? GAME.wave.bossSlowFactor : 1);
+      this._beginStep(dt, input);
+      const batch = this._attackBatch();
+      const pending = batch.enemies.length ? this.prepareAttacks(batch) : null;
+      const attacks = pending ? await pending : null;
+      // UI events may pause, restart, or destroy the aircraft while a worker is computing.
+      if (epoch !== this.stepEpoch || this.state !== 'playing') return;
+      this._finishStep(dt, attacks ?? planAttacks(batch));
+      this.slowMotion = Math.max(0, this.slowMotion - slice);
+      remaining -= slice;
+    }
+  }
+
+  _beginStep(dt, input) {
     this.lifeLostThisStep = false;
     this.time += dt;
     this.waveTime += dt;
@@ -168,12 +204,52 @@ export class Game {
     this._playerFire(dt);
     this._waveTick(dt);
     this._moveEnemies(dt);
+  }
+
+  _finishStep(dt, attacks) {
+    this._applyAttacks(attacks);
     this._moveBullets(dt);
     if (this.state !== 'playing') return;
     this._moveObstacles(dt);
     this._movePickups(dt);
     this._resolveCollisions();
     if (this.state === 'playing') this._advanceWave(dt);
+  }
+
+  _attackBatch() {
+    this.attackTargets.clear();
+    const enemies = [];
+    for (const e of this.enemies) {
+      if (!e.active || e.reviveAt || !hasAttack(e)) continue;
+      this.attackTargets.set(e.id, e);
+      enemies.push({ id: e.id, boss: e.boss, behavior: e.behavior,
+        x: e.x, y: e.y, w: e.w, h: e.h, damage: e.damage, age: e.age, phase: e.phase,
+        shotTimer: e.shotTimer, actionTimer: e.actionTimer, summonTimer: e.summonTimer,
+        burst: e.burst, diving: e.diving, invisible: e.invisible, phaseIndex: e.phaseIndex });
+    }
+    return { wave: this.wave, player: { x: this.player.x, y: this.player.y }, enemies };
+  }
+
+  _applyAttacks(attacks) {
+    for (const attack of attacks) {
+      const enemy = this.attackTargets.get(attack.id);
+      if (!enemy?.active || enemy.reviveAt) continue;
+      enemy.shotTimer = attack.shotTimer;
+      enemy.burst = attack.burst;
+      enemy.summonTimer = attack.summonTimer;
+      for (const command of attack.commands) {
+        if (command.type === 'spawn') this._spawnEnemy(command.enemyType, command.x, command.y);
+        else this._bullet(true, command.x, command.y, command.vx, command.vy, command.damage, command.extra);
+      }
+    }
+    // Diving shots originate before wraparound; the aircraft returns before collisions.
+    for (const enemy of this.enemies) {
+      if (!enemy.active || enemy.boss || !enemy.diving || enemy.y <= GAME.height + enemy.h) continue;
+      if (enemy.behavior === 'dive' || enemy.behavior === 'intercept') {
+        enemy.y = enemy.homeY; enemy.diving = false;
+        if (enemy.behavior === 'dive') enemy.burst = 0;
+      }
+    }
   }
 
   _waveTick(dt) {
@@ -305,21 +381,6 @@ export class Game {
     return bullet;
   }
 
-  _aim(e, speed, damage = e.damage, extras = null) {
-    const dx = this.player.x - e.x, dy = this.player.y - e.y;
-    const distance = Math.hypot(dx, dy) || 1;
-    return this._bullet(true, e.x, e.y + e.h / 2, dx / distance * speed, dy / distance * speed, damage, extras);
-  }
-
-  _fan(e, count, spread, speed, damage = e.damage,
-    angle = Math.atan2(this.player.x - e.x, this.player.y - e.y), originOffset = 0) {
-    for (let i = 0; i < count; i++) {
-      const theta = angle + (i - (count - 1) / 2) * spread;
-      this._bullet(true, e.x + originOffset, e.y + e.h / 2,
-        Math.sin(theta) * speed, Math.cos(theta) * speed, damage);
-    }
-  }
-
   _nearestEnemy(x, y) {
     let nearest = null, best = Infinity;
     for (const e of this.enemies) {
@@ -358,10 +419,6 @@ export class Game {
           if (e.diving) {
             e.y += MOTION.dive.speed * speedFactor * dt;
             e.x += clamp(e.targetX - e.x, -MOTION.dive.speed * dt, MOTION.dive.speed * dt);
-            if (e.actionTimer >= MOTION.dive.shotAt && !e.burst) {
-              this._aim(e, MOTION.attack.enemyBullet); e.burst = 1;
-            }
-            if (e.y > GAME.height + e.h) { e.y = e.homeY; e.diving = false; e.burst = 0; }
           } else { e.x = formationX; e.y = formationY; }
           break;
         case 'ram':
@@ -417,10 +474,6 @@ export class Game {
           if (e.diving) {
             e.y += MOTION.intercept.speed * speedFactor * dt;
             e.x += Math.sign(GAME.width / 2 - e.x) * MOTION.intercept.speed * dt;
-            if (e.burst && e.shotTimer > MOTION.attack.intercept) {
-              this._aim(e, MOTION.attack.enemyBullet); e.shotTimer = 0; e.burst--;
-            }
-            if (e.y > GAME.height + e.h) { e.y = e.homeY; e.diving = false; }
           } else { e.x = formationX; e.y = formationY; }
           break;
         case 'spiral':
@@ -437,52 +490,8 @@ export class Game {
           break;
         default: e.x = formationX; e.y = formationY;
       }
-      if (e.y > GAME.height + e.h) { e.active = false; continue; }
-      this._enemyAttack(e);
+      if (e.y > GAME.height + e.h && !e.diving) e.active = false;
     }
-  }
-
-  _enemyAttack(e) {
-    const attack = MOTION.attack;
-    const cadence = Math.max(GAME.enemyFireFloor,
-      GAME.enemyShotInterval - Math.floor((this.wave - 1) / GAME.shotDensityEvery) *
-        GAME.enemyShotStagger) / GAME.enemyShotInterval;
-    switch (e.behavior) {
-      case 'scatter': if (e.shotTimer >= (attack.scatter + e.phase / TAU) * cadence) {
-        this._fan(e, attack.scatterCount, attack.scatterAngle, attack.enemyBullet); e.shotTimer = 0;
-      } break;
-      case 'bomber': if (e.shotTimer >= attack.bomber * cadence) {
-        this._bullet(true, e.x, e.y + e.h / 2, 0, attack.bombSpeed, e.damage,
-          { kind: 'bomb', w: GAME.mineSize, h: GAME.mineSize }); e.shotTimer = 0;
-      } break;
-      case 'tracker': if (!e.burst && e.shotTimer >= attack.tracker * cadence) {
-        e.burst = attack.trackerBurst; e.shotTimer = 0;
-      }
-        if (e.burst && e.shotTimer >= attack.trackingGap) {
-          this._aim(e, GAME.missileSpeed, e.damage, { kind: 'missile', homing: true });
-          e.shotTimer = 0; e.burst--;
-        } break;
-      case 'cloak': if (!e.invisible && e.shotTimer >= attack.cloak * cadence) {
-        this._aim(e, attack.enemyBullet); e.shotTimer = 0;
-      } break;
-      case 'jammer': if (e.shotTimer >= attack.jammer * cadence) {
-        this._aim(e, attack.enemyBullet, e.damage, { slow: true }); e.shotTimer = 0;
-      } break;
-      case 'minelayer': if (e.shotTimer >= attack.mine * cadence) { this._mine(e.x, e.y, e.damage); e.shotTimer = 0; } break;
-      case 'spiral': if (e.shotTimer >= attack.spiral * cadence) {
-        this._fan(e, attack.spiralCount, TAU / attack.spiralCount, attack.enemyBullet, e.damage, e.age);
-        e.shotTimer = 0;
-      } break;
-      case 'carrier': if (e.shotTimer >= MOTION.carrier.summonInterval * cadence) {
-        this._spawnEnemy('E1', e.x, e.y + e.h); e.shotTimer = 0;
-      } break;
-      default: break;
-    }
-  }
-
-  _mine(x, y, damage) {
-    this._bullet(true, x, y, 0, MOTION.attack.mineSpeed, damage,
-      { kind: 'mine', w: GAME.mineSize, h: GAME.mineSize });
   }
 
   _moveBoss(e, dt, speedFactor) {
@@ -504,85 +513,6 @@ export class Game {
     if (e.behavior === 'minefield' && e.actionTimer >= b.shieldRegen && !e.shield) {
       e.shield = b.shieldHP; e.actionTimer = 0;
     }
-    this._bossAttack(e);
-  }
-
-  _bossAttack(e) {
-    const b = GAME.boss;
-    const patterns = b.patterns;
-    const interval = e.behavior === 'minefield' ? patterns.minefield.interval : b.fireInterval;
-    if (e.shotTimer < interval || (e.behavior === 'assassin' && e.invisible)) return;
-    e.shotTimer = 0;
-    const speed = GAME.enemyBulletSpeed;
-    switch (e.behavior) {
-      case 'hive':
-        this._fan(e, patterns.hive.count, patterns.hive.spread, speed);
-        e.summonTimer += interval;
-        if (e.summonTimer >= b.spawnInterval) {
-          e.summonTimer = 0;
-          this._spawnEnemy(e.age % (b.spawnInterval * 2) < b.spawnInterval ? 'E1' : 'E5',
-            e.x, e.y + e.h / 2);
-        }
-        break;
-      case 'crossfire':
-        for (let side = -1; side <= 1; side += 2) {
-          const turretX = side * e.w * patterns.crossfire.turretOffset;
-          this._fan(e, patterns.crossfire.count, patterns.crossfire.spread, speed, e.damage,
-            Math.atan2(this.player.x - e.x - turretX - side * patterns.crossfire.lead,
-              this.player.y - e.y), turretX);
-        }
-        break;
-      case 'fortress':
-        this._fan(e, patterns.fortress.count, patterns.fortress.spread, speed);
-        if (Math.floor(e.age / interval) % patterns.fortress.laserEvery === 0) this._laser(e);
-        break;
-      case 'assassin':
-        this._fan(e, patterns.assassin.count, patterns.assassin.spread,
-          speed * patterns.assassin.speedFactor);
-        break;
-      case 'minefield':
-        for (let i = 0; i < patterns.minefield.count; i++)
-          this._mine(e.x + (i - (patterns.minefield.count - 1) / 2) * e.w / patterns.minefield.count,
-            e.y, e.damage);
-        break;
-      case 'missiles':
-        for (let i = 0; i < patterns.missiles.count; i++) {
-          const offset = i - (patterns.missiles.count - 1) / 2;
-          this._bullet(true, e.x + offset * patterns.missiles.spacing, e.y + e.h / 2,
-            offset * patterns.missiles.spread, GAME.missileSpeed, e.damage,
-            { kind: 'missile', homing: true });
-        }
-        e.summonTimer += interval;
-        if (e.summonTimer >= b.spawnInterval) {
-          e.summonTimer = 0;
-          this._spawnEnemy('E7', e.x, e.y + e.h / 2);
-        }
-        break;
-      case 'plasma':
-        this._fan(e, patterns.plasma.count, TAU / patterns.plasma.count,
-          speed, patterns.plasma.damage, e.age);
-        break;
-      case 'abyss':
-        if (e.phaseIndex === 0)
-          this._fan(e, patterns.abyss.barrage, patterns.abyss.barrageSpread, speed);
-        else if (e.phaseIndex === 1) {
-          e.summonTimer += interval;
-          if (e.summonTimer >= b.spawnInterval) {
-            e.summonTimer = 0;
-            this._spawnEnemy('E5', e.x, e.y + e.h / 2);
-          }
-          this._fan(e, patterns.abyss.escort, patterns.abyss.escortSpread, speed);
-        } else this._fan(e, patterns.abyss.spiral, TAU / patterns.abyss.spiral,
-          speed, e.damage, e.age);
-        break;
-      default: break;
-    }
-  }
-
-  _laser(e) {
-    this._bullet(true, this.player.x, e.y + e.h / 2, 0, GAME.boss.laserSpeed,
-      e.damage, { kind: 'laser', w: GAME.boss.laserWidth, h: GAME.boss.laserWidth,
-        delay: GAME.boss.laserTelegraph });
   }
 
   _moveBullets(dt) {
@@ -720,7 +650,6 @@ export class Game {
     return true;
   }
 
-
   damagePlayer(amount, { obstacle = false } = {}) {
     if (this.state !== 'playing') return false;
     const p = this.player;
@@ -753,6 +682,7 @@ export class Game {
 
   _loseLife(reason = 'damage') {
     if (this.lifeLostThisStep) return;
+    this.stepEpoch++;
     this.lifeLostThisStep = true;
     const p = this.player;
     p.lives--;

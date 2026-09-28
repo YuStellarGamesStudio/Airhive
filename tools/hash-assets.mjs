@@ -21,7 +21,7 @@ const imports = Object.fromEntries(modules.map((file) => [`./${file}`, `./${urls
 let html = (await read('index.html')).toString();
 html = html.replace(/<!-- ASSET_IMPORTS_START -->[\s\S]*?<!-- ASSET_IMPORTS_END -->/, `<!-- ASSET_IMPORTS_START -->\n  <script type="importmap">${JSON.stringify({ imports })}</script>\n  <!-- ASSET_IMPORTS_END -->`);
 html = html.replace(/(src|href)="([^"?]+)(?:\?[^"\s]*)?"/g, (match, attribute, file) => urls[file] ? `${attribute}="${urls[file]}"` : match);
-// Runtime fetches and AudioWorklet imports do not consult the document import map.
+// Runtime fetches, Workers and AudioWorklet imports do not consult the document import map.
 // Cache those exact bare URLs too; immutable hash URLs remain fully isolated.
 const precache = ['index.html', ...files, ...Object.values(urls)];
 const original = (await read('sw.js')).toString();

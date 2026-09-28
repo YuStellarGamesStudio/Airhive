@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Game } from '../src/core/game.js';
 import { GAME, WEAPONS } from '../src/data/game.js';
+import { planAttacks } from '../src/core/attack-plan.js';
 
 const makeGame = () => {
   const game = new Game({ random: () => 0.99 });
@@ -341,4 +342,51 @@ test('score lives require crossing a threshold and a large award respects the li
   assert.equal(game.player.bank, 37);
   game._award(GAME.bonusLifeScore);
   assert.equal(game.player.lives, 3 + GAME.bonusLifeCap);
+});
+
+test('late attack results cannot cross a pause/resume or restart boundary', async () => {
+  let reply;
+  const game = new Game({ random: () => 0.99,
+    planAttacks: batch => new Promise(resolve => { reply = () => resolve(planAttacks(batch)); }) });
+  game.start(); game.startWave(21); game.nextSpawn = Infinity;
+  const enemy = game._spawnEnemy('E3', 100, 100);
+  enemy.shotTimer = 10;
+  const pending = game.update(GAME.step);
+  const time = game.time;
+  game.pause(); game.resume();
+  reply(); await pending;
+  assert.equal(game.state, 'playing');
+  assert.equal(game.time, time);
+  assert.equal(enemy.shotTimer, 10 + GAME.step);
+  assert.equal(game.enemyBullets.some(b => b.active), false);
+
+  const obsolete = game.update(GAME.step);
+  game.start();
+  reply(); await obsolete;
+  assert.equal(game.wave, 1);
+  assert.equal(game.time, 0);
+  assert.equal(game.player.hp, GAME.player.hp);
+  assert.equal(game.enemyBullets.some(b => b.active), false);
+});
+
+test('a delayed or unavailable attack planner completes collisions exactly once', async () => {
+  for (const unavailable of [false, true]) {
+    let reply;
+    const game = new Game({ random: () => 0.99,
+      planAttacks: batch => new Promise(resolve => {
+        reply = () => resolve(unavailable ? null : planAttacks(batch));
+      }) });
+    game.start(); game.startWave(21); game.nextSpawn = Infinity;
+    game._spawnEnemy('E3', 100, 100).shotTimer = 10;
+    const incoming = game._bullet(true, game.player.x, game.player.y - 1, 0, 0, 15);
+    const pending = game.update(GAME.step);
+    assert.equal(game.update(GAME.step), pending);
+    assert.equal(game.player.hp, 100);
+    assert.equal(incoming.active, true);
+    reply(); await pending;
+    assert.equal(game.time, GAME.step);
+    assert.equal(game.player.hp, 85);
+    assert.equal(incoming.active, false);
+    assert.equal(game.enemyBullets.filter(b => b.active).length, 3);
+  }
 });

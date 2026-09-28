@@ -1,5 +1,5 @@
 // Generated cache metadata is updated by tools/hash-assets.mjs.
-const VERSION = 'airhive-99bdb1a54a0dcd95';
+const VERSION = 'airhive-76a87d84e55b1b98';
 const PRECACHE = [
   "index.html",
   "LICENSE",
@@ -64,6 +64,9 @@ const PRECACHE = [
   "favicon.ico",
   "manifest.webmanifest",
   "src/audio/audio.js",
+  "src/core/attack-plan.js",
+  "src/core/enemy-planner.js",
+  "src/core/enemy-worker.js",
   "src/core/game.js",
   "src/core/wave-plan.js",
   "src/data/assets.js",
@@ -92,7 +95,7 @@ const PRECACHE = [
   "src/vendor/opm/provenance.json",
   "LICENSE?v=0d96a4ff68ad6d4b",
   "app.css?v=026acc8ef9e4c1d4",
-  "app.js?v=c5781b11d1a307af",
+  "app.js?v=68b690ffb79854ee",
   "assets/art/B1.svg?v=359c12f8666fa665",
   "assets/art/B2.svg?v=9b8fe999bbe90a89",
   "assets/art/B3.svg?v=8d55ec6a6adb8c2b",
@@ -152,11 +155,14 @@ const PRECACHE = [
   "favicon.ico?v=61e3b43cc7c3a8e2",
   "manifest.webmanifest?v=63e7744dd5900283",
   "src/audio/audio.js?v=d91a95afa4301835",
-  "src/core/game.js?v=4c5778ff84f0c958",
+  "src/core/attack-plan.js?v=292020fa36187299",
+  "src/core/enemy-planner.js?v=8c9bf268a97436ac",
+  "src/core/enemy-worker.js?v=dde49d89126e22e7",
+  "src/core/game.js?v=3c5f701d9ae0c03d",
   "src/core/wave-plan.js?v=10b67dc2e9a4b23e",
   "src/data/assets.js?v=cea0a0a16e1f1086",
   "src/data/audio.js?v=70ecc15afaf49b38",
-  "src/data/game.js?v=6796bf2410f91715",
+  "src/data/game.js?v=d231fb8741d30f7b",
   "src/data/settings.js?v=72e6e6ab5d33938c",
   "src/data/visuals.js?v=77cba586ff31fda2",
   "src/i18n/index.js?v=c61a00ffe4008ca1",

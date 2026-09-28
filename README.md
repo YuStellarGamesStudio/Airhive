@@ -43,7 +43,9 @@ The entrypoints are `index.html`, `app.js`, and `app.css`. Run `npm run assets:h
 
 16 enemy types, eight rotating bosses, ten weapon tiers, six automatic pickups, a death/continue/restart flow, layered SVG artwork, 24 original FM scores, separate effects controls, and offline local saves are integrated. The runtime is plain ES modules with vendored OPM.js 1.1.0.
 
-`npm test` passes 22 regression tests. Real Chromium smoke runs cover keyboard/touch input, all three languages, responsive layouts, safe imports, service-worker upgrades, and a complete sortie with the HTTP server stopped. Device installation, listening review, and player-balance statistics remain manual checks in [ACCEPTANCE.md](ACCEPTANCE.md).
+Enemy formations and attack decisions share a module-worker pool sized from the browser's `navigator.hardwareConcurrency` report: reserve one logical core, cap at four workers, and precompute up to eight waves. Attack jobs take priority; movement, collisions, and rendering remain on the main thread. Single-core/unsupported environments and failed or timed-out workers use the same synchronous calculations. Workers and their dependencies also work offline.
+
+`npm test` passes 32 regression tests, including real worker threads. Real Chromium smoke runs cover keyboard/touch input, all three languages, responsive layouts, safe imports, service-worker upgrades, threaded combat, worker-failure recovery, and play with the HTTP server stopped. Device installation, listening review, and player-balance statistics remain manual checks in [ACCEPTANCE.md](ACCEPTANCE.md).
 
 ## Deployment / 部署 / 公開
 

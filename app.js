@@ -1,4 +1,5 @@
 import { Game } from './src/core/game.js';
+import { EnemyPlanner } from './src/core/enemy-planner.js';
 import { GAME, WEAPONS } from './src/data/game.js';
 import { UI, SAVE } from './src/data/settings.js';
 import { Renderer } from './src/render/renderer.js';
@@ -13,7 +14,9 @@ const i18n = new I18n(language);
 store.data.settings.language = language;
 export const audio = new AudioManager(store.data.settings);
 export const renderer = new Renderer($('battlefield'));
-export const game = new Game({ onEvent: handleEvent });
+const enemyPlanner = new EnemyPlanner();
+export const game = new Game({ onEvent: handleEvent, planWave: wave => enemyPlanner.get(wave),
+  planAttacks: batch => enemyPlanner.attack(batch) });
 const keys = new Set();
 const directions = new Set();
 const input = { axis: 0, targetX: null };
@@ -316,14 +319,14 @@ $('confirm-import').addEventListener('click', () => {
 });
 motion.addEventListener('change', () => { renderOptions.reducedMotion = motion.matches; });
 
-function frame(timestamp) {
+async function frame(timestamp) {
   const dt = lastTime === null ? 0 : Math.min((timestamp - lastTime) / 1000, UI.maxFrame); lastTime = timestamp;
   input.axis = Number(keys.has('arrowright') || keys.has('d') || directions.has(1)) - Number(keys.has('arrowleft') || keys.has('a') || directions.has(-1));
   if (game.state === 'playing' || game.state === 'dying') {
     accumulator += dt;
     while (accumulator >= GAME.step && (game.state === 'playing' || game.state === 'dying')) {
       accumulator -= GAME.step;
-      game.update(GAME.step, input);
+      await game.update(GAME.step, input);
     }
     if (game.state !== 'playing' && game.state !== 'dying') accumulator = 0;
   } else accumulator = 0;
