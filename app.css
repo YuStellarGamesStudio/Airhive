@@ -205,6 +205,11 @@ canvas {
   touch-action:none;
   outline:none
 }
+.gpu-battlefield {
+  position:absolute;
+  inset:0;
+  pointer-events:none
+}
 .screen {
   position:absolute;
   inset:0
@@ -1700,7 +1705,7 @@ footer a {
     display: none;
   }
   .main {
-    width: min(960px, 100%, calc((100dvh - 136px) * 16 / 9));
+    width: min(960px, 100%, calc((100dvh - 160px) * 16 / 9));
   }
   .main.in-flight {
     width: min(960px, 100%, calc((100dvh - 230px) * 16 / 9));

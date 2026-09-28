@@ -107,6 +107,7 @@ function updateHud() {
   const player = game.player;
   setText('compute-status', enemyPlanner.mode === 'webgpu' ? i18n.t('computeGpu') :
     enemyPlanner.workerCount ? i18n.t('computeWorkers').replace('{count}', enemyPlanner.workerCount) : i18n.t('computeSingle'));
+  setText('render-status', i18n.t(renderer.mode === 'webgpu' ? 'renderGpu' : 'renderCanvas'));
   setText('score', number(game.score).padStart(6, '0'));
   setText('wave', String(game.wave).padStart(2, '0'));
   setText('hp-value', Math.ceil(player.hp)); $('hp').value = player.hp;

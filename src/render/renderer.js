@@ -1,5 +1,6 @@
 import {VISUALS as V} from '../data/visuals.js';
 import {ASSET_URLS} from '../data/assets.js';
+import {WebGPURenderer} from './webgpu-renderer.js';
 
 const TAU = Math.PI * 2;
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -25,6 +26,28 @@ export class Renderer {
     this.reducedMotion = false;
     this.lastPlayerX = null;
     this.bank = 0;
+    this.gpuCanvas = document.createElement('canvas');
+    this.gpuCanvas.className = 'gpu-battlefield';
+    this.gpuCanvas.setAttribute('aria-hidden', 'true');
+    this.gpuCanvas.hidden = true;
+    canvas.after(this.gpuCanvas);
+    this.emission = document.createElement('canvas');
+    this.emission.width = V.width;
+    this.emission.height = V.height;
+    this.emissionCtx = this.emission.getContext('2d');
+    this.foreground = document.createElement('canvas');
+    this.foregroundCtx = this.foreground.getContext('2d');
+    this.gpu = new WebGPURenderer(this.gpuCanvas, {
+      onUnavailable: () => { this.gpuCanvas.hidden = true; },
+    });
+    this.gpuFrame = {elapsed: 0, shake: 0, reducedMotion: false};
+  }
+
+  get mode() { return this.gpu.available && !this.gpuCanvas.hidden ? 'webgpu' : 'canvas2d'; }
+
+  dispose() {
+    this.gpu.dispose();
+    this.gpuCanvas.remove();
   }
 
   load() {
@@ -90,15 +113,18 @@ export class Renderer {
     }
   }
 
-  event({type, x = V.width / 2, y = V.height / 2, boss = false} = {}) {
+  event({type, x = V.width / 2, y = V.height / 2, boss = false, target = null, survived = false} = {}) {
     if (type === 'start' || type === 'continue') {
       for (const p of this.particles) p.life = 0;
       this.shake = this.flash = this.ring = 0;
       this.lastPlayerX = null;
       this.bank = 0;
+      this.paused = false;
+      this.gpu.reset();
       return;
     }
     if (this.paused) return;
+    this.gpu.event({type, x, y, boss, target, survived}, this.reducedMotion);
     if (type === 'explosion' || type === 'bomb') {
       const count = boss ? V.bossExplosionParticles : V.explosionParticles;
       this.spawn(x, y, count, 'flame');
@@ -108,7 +134,7 @@ export class Renderer {
       this.flash = Math.max(this.flash, boss ? 0.8 : 0.27);
       if (boss) { this.ring = 1; this.ringKind = 'boss'; this.ringX = x; this.ringY = y; }
     } else if (type === 'hit' || type === 'shield') {
-      this.spawn(x, y, V.hitParticles, type === 'shield' ? 'spark' : 'flame');
+      if (!this.gpu.available) this.spawn(x, y, V.hitParticles, type === 'shield' ? 'spark' : 'flame');
       this.shake = Math.max(this.shake, V.shakeHit);
       this.flash = Math.max(this.flash, 0.13);
     } else if (type === 'pickup' || type === 'life' || type === 'upgrade') {
@@ -131,8 +157,13 @@ export class Renderer {
 
   resize() {
     const dpr = window.devicePixelRatio || 1;
-    const width = Math.max(1, Math.round((this.canvas.clientWidth || V.width) * dpr));
-    const height = Math.max(1, Math.round((this.canvas.clientHeight || V.height) * dpr));
+    let width = Math.max(1, Math.round((this.canvas.clientWidth || V.width) * dpr));
+    let height = Math.max(1, Math.round((this.canvas.clientHeight || V.height) * dpr));
+    if (this.gpu.available) {
+      const scale = Math.min(1, V.gpuMaxDimension / Math.max(width, height), Math.sqrt(V.gpuMaxPixels / (width * height)));
+      width = Math.max(1, Math.floor(width * scale));
+      height = Math.max(1, Math.floor(height * scale));
+    }
     if (this.canvas.width !== width || this.canvas.height !== height) {
       this.canvas.width = width;
       this.canvas.height = height;
@@ -191,7 +222,7 @@ export class Renderer {
       ctx.lineTo(player.x + offset + 4, nozzleY);
       ctx.fill();
     }
-    this.sprite(ctx, 'player', player, this.bank);
+    if (!this.gpu.available) this.sprite(ctx, 'player', player, this.bank);
     if (player.shield) {
       ctx.strokeStyle = 'rgba(110,228,246,.75)';
       ctx.lineWidth = 2.5;
@@ -382,6 +413,7 @@ export class Renderer {
       p.rotation += dt * 2;
       if (p.kind !== 'smoke') p.vy += 75 * dt;
       const progress = p.life / p.maxLife;
+      if (p.kind === 'smoke' && this.gpu.available) continue;
       ctx.globalAlpha = Math.min(1, progress * 1.4);
       if (p.kind === 'smoke') {
         ctx.fillStyle = '#8296a2';
@@ -393,6 +425,22 @@ export class Renderer {
         ctx.fillStyle = p.kind === 'spark' ? '#9debf1' : progress > 0.55 ? '#fff0b3' : '#ed8053';
         ctx.beginPath();ctx.arc(p.x,p.y,p.size * progress,0,TAU);ctx.fill();
       }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  drawEmission(game) {
+    const ctx = this.emissionCtx;
+    ctx.clearRect(0, 0, V.width, V.height);
+    if (!game || game.state === 'menu') return;
+    this.drawShots(ctx, game.bullets);
+    this.drawShots(ctx, game.enemyBullets, true);
+    for (const p of this.particles) {
+      if (p.life <= 0 || p.kind === 'smoke' || p.kind === 'debris') continue;
+      const progress = p.life / p.maxLife;
+      ctx.globalAlpha = Math.min(1, progress * 1.4);
+      ctx.fillStyle = p.kind === 'spark' ? '#9debf1' : progress > 0.55 ? '#fff0b3' : '#ed8053';
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size * progress, 0, TAU); ctx.fill();
     }
     ctx.globalAlpha = 1;
   }
@@ -421,26 +469,42 @@ export class Renderer {
     this.resize();
     this.reducedMotion = reducedMotion;
     const frozen = game && (game.state === 'paused' || game.state === 'death' || game.state === 'gameover');
+    this.paused = !!frozen;
     const step = frozen ? 0 : clamp(dt || 0, 0, V.maxFrameDelta) * (game?.slowMotion > 0 ? 0.35 : 1);
     if (!frozen) {
       this.elapsed += reducedMotion ? 0 : step;
       this.shake = Math.max(0, this.shake - step * V.shakeDecay);
       this.flash = Math.max(0, this.flash - step * (this.ring ? V.bossFlashFade : V.flashFade));
     }
-    const ctx = this.ctx;
+    let ctx = this.ctx;
+    if (this.gpu.available) {
+      if (this.foreground.width !== this.canvas.width || this.foreground.height !== this.canvas.height) {
+        this.foreground.width = this.canvas.width;
+        this.foreground.height = this.canvas.height;
+      }
+      this.foregroundCtx.setTransform(this.canvas.width / V.width, 0, 0, this.canvas.height / V.height, 0, 0);
+      this.foregroundCtx.clearRect(0, 0, V.width, V.height);
+    }
     ctx.save();
     this.drawSky(ctx);
     const playing = game && game.state !== 'menu';
     if (playing) {
       ctx.save();
-      if (!reducedMotion && this.shake > 0 && !frozen) ctx.translate((Math.random() - 0.5) * this.shake, (Math.random() - 0.5) * this.shake);
+      if (!this.gpu.available && !reducedMotion && this.shake > 0 && !frozen)
+        ctx.translate((Math.random() - 0.5) * this.shake, (Math.random() - 0.5) * this.shake);
       for (const item of game.obstacles || []) this.sprite(ctx, 'obstacle', item);
       for (const item of game.pickups || []) this.drawPickup(ctx, item);
-      for (const enemy of game.enemies || []) {
-        if (enemy.active === false || enemy.invisible || enemy === game.boss) continue;
-        this.sprite(ctx, enemy.type, enemy);
+      if (this.gpu.available) {
+        ctx.restore(); ctx.restore();
+        ctx = this.foregroundCtx;
+        ctx.save(); ctx.save();
+      } else {
+        for (const enemy of game.enemies || []) {
+          if (enemy.active === false || enemy.invisible || enemy === game.boss) continue;
+          this.sprite(ctx, enemy.type, enemy);
+        }
+        if (!game.boss?.invisible) this.sprite(ctx, game.boss?.type, game.boss);
       }
-      if (!game.boss?.invisible) this.sprite(ctx, game.boss?.type, game.boss);
       if (game.player && !frozen) {
         if (this.lastPlayerX !== null && step > 0) {
           const target = clamp((game.player.x - this.lastPlayerX) / (step * V.bankVelocity), -1, 1);
@@ -470,7 +534,7 @@ export class Renderer {
         this.ring = Math.max(0, this.ring - step * (this.ringKind === 'death' ? 1.05 : 0.7));
       }
       ctx.restore();
-      if (this.flash > 0) {
+      if (this.flash > 0 && !this.gpu.available) {
         ctx.fillStyle = `rgba(255,226,196,${Math.min(0.53,this.flash * 0.47)})`;
         ctx.fillRect(0,0,V.width,V.height);
       }
@@ -484,5 +548,17 @@ export class Renderer {
       }
     }
     ctx.restore();
+    if (this.gpu.available) {
+      this.drawEmission(game);
+      this.gpuFrame.elapsed = this.elapsed;
+      this.gpuFrame.shake = this.shake;
+      this.gpuFrame.reducedMotion = reducedMotion;
+      this.gpuFrame.game = game;
+      this.gpuFrame.images = this.images;
+      this.gpuFrame.bank = this.bank;
+      this.gpuFrame.foreground = this.foreground;
+      this.gpuCanvas.hidden = !this.gpu.render(this.canvas, this.emission, step, this.gpuFrame);
+      if (!this.gpu.available) this.render(game, 0, {t, reducedMotion});
+    } else this.gpuCanvas.hidden = true;
   }
 }

@@ -639,11 +639,11 @@ export class Game {
   _damageEnemy(enemy, damage) {
     if (enemy.shield > 0) {
       enemy.shield--;
-      this.onEvent({ type: 'shield', x: enemy.x, y: enemy.y });
+      this.onEvent({ type: 'shield', x: enemy.x, y: enemy.y, target: enemy, survived: true });
       return false;
     }
     enemy.hp -= damage;
-    this.onEvent({ type: 'hit', x: enemy.x, y: enemy.y });
+    this.onEvent({ type: 'hit', x: enemy.x, y: enemy.y, target: enemy, survived: enemy.hp > 0 });
     if (enemy.hp <= 0) this._kill(enemy);
     return true;
   }
@@ -661,7 +661,7 @@ export class Game {
     if (p.shield) {
       p.shield = false;
       p.invulnerable = GAME.player.invulnerability;
-      this.onEvent({ type: 'shield', x: p.x, y: p.y });
+      this.onEvent({ type: 'shield', x: p.x, y: p.y, target: p, survived: true });
       return false;
     }
     if (this.wave <= GAME.wave.earlyWaveEnd) {
@@ -672,7 +672,7 @@ export class Game {
     if (amount <= 0) return false;
     p.hp -= amount;
     this.combo = 0;
-    this.onEvent({ type: 'hit', x: p.x, y: p.y });
+    this.onEvent({ type: 'hit', x: p.x, y: p.y, target: p, survived: p.hp > 0 });
     if (p.hp <= 0) this._loseLife();
     else p.invulnerable = GAME.player.invulnerability;
     return true;

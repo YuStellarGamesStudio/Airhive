@@ -32,6 +32,47 @@ test('paused simulation freezes movement, time, timers, bullets, and damage', ()
   assert.ok(game.player.x > before.x);
 });
 
+test('surviving aircraft hits identify their target without turning shield or lethal hits into survivor effects', () => {
+  const game = makeGame();
+  const events = [];
+  game.onEvent = event => events.push(event);
+  const enemy = game._spawnEnemy('E1', 180, 120);
+  enemy.hp = 3;
+  enemy.shield = 1;
+  const strike = damage => {
+    game._bullet(false, enemy.x, enemy.y, 0, 0, damage);
+    game._resolveCollisions();
+  };
+  strike(2);
+  assert.equal(enemy.hp, 3);
+  assert.equal(enemy.shield, 0);
+  assert.equal(events.at(-1).type, 'shield');
+  assert.equal(events.at(-1).target, enemy);
+  assert.equal(events.at(-1).survived, true);
+  strike(2);
+  assert.equal(enemy.hp, 1);
+  assert.equal(enemy.active, true);
+  assert.equal(events.at(-1).type, 'hit');
+  assert.equal(events.at(-1).survived, true);
+  strike(2);
+  assert.equal(enemy.active, false);
+  assert.equal(events.filter(event => event.type === 'explosion').length, 1);
+  assert.equal(events.filter(event => event.type === 'hit').at(-1).survived, false);
+
+  game.wave = 4;
+  game.player.invulnerable = 0;
+  game.damagePlayer(10);
+  assert.equal(events.at(-1).target, game.player);
+  assert.equal(events.at(-1).survived, true);
+  const before = events.length;
+  game.damagePlayer(10);
+  assert.equal(events.length, before, 'invulnerability must not trigger another impact');
+  game.player.invulnerable = 0;
+  game.damagePlayer(100);
+  assert.equal(game.state, 'dying');
+  assert.equal(events.filter(event => event.type === 'hit').at(-1).survived, false);
+});
+
 test('two simultaneous obstacles cost exactly one life despite shield, HP and invulnerability', () => {
   const game = makeGame();
   game.fireClock = 0;

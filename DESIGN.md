@@ -111,7 +111,7 @@ Boss B1–B8 基礎 HP 為 **128／140／156／132／160／160／176／210**。�
 
 #### 敵機 WebGPU 與多核心規劃
 
-優先使用 WebGPU compute 計算每架敵機的編隊位置／類型，以及瞄準與扇形彈道；射擊門檻、連發、召喚計時及結果順序共用 JavaScript 雙精度邏輯，避免 GPU Float32 改變攻擊時序。GPU buffers 重用，沒有待計算彈道時不提交空 dispatch；Canvas 2D 渲染不變。
+優先使用 WebGPU compute 計算每架敵機的編隊位置／類型，以及瞄準與扇形彈道；射擊門檻、連發、召喚計時及結果順序共用 JavaScript 雙精度邏輯，避免 GPU Float32 改變攻擊時序。GPU buffers 重用，沒有待計算彈道時不提交空 dispatch；渲染使用獨立 WebGPU 裝置，避免兩者失效互相牽連。
 
 初始化期間立即使用 CPU Module Workers：讀取 `navigator.hardwareConcurrency` 回報的邏輯核心數，保留一核、最多四個 Worker，預先規劃八波，攻擊優先。GPU 就緒後接手新工作，保留 CPU 池供回退；這不是實體核心數的精確探測。
 
@@ -120,6 +120,14 @@ WebGPU 不支援、無 adapter、初始化失敗／超過五秒、device lost、
 移動、隨機取樣、碰撞、計分與渲染仍由主執行緒管理；每步取得攻擊結果後按原順序套用，再進行碰撞。暫停、換波、死亡或重開使舊結果失效。GPU 模組、shader 與 Worker 依賴均納入版本化離線快取；GPU 讀回成本與實際效能須按裝置評估，不宣稱一定比 CPU 快。
 
 開始畫面上方顯示目前運算模式：WebGPU、CPU 多執行緒（實際 Worker 數）或 CPU 單執行緒。沿用每 80 ms 的 HUD 更新與三語切換流程，GPU 就緒／失效及 Worker 池失效後會同步標示，不把保留的備援池誤報為正在使用的 GPU 執行緒。
+
+#### WebGPU 高品質渲染
+
+- 玩家、16 種敵機與八種 Boss 的 SVG 先光柵化為高解析 texture array，僅上傳一次；每幀提交有界 instance buffer，GPU 完成位置、尺寸、轉向傾斜、透明度與受擊閃光。GPU 模式不再用 Canvas 繪製這些機體。
+- 天空／道具底圖與子彈亮芯／HUD 等前景仍由 Canvas 產生，透過 `copyExternalImageToTexture` 合成；HDR 場景經半解析度、四分之一解析度 Gaussian bloom、衝擊波扭曲、衰減震動與高光 tone mapping 後輸出。DOM HUD 與控制鈕不受扭曲。
+- 爆炸煙霧使用 512 格 GPU storage 粒子池：compute 模擬浮升、阻力、渦流、擴散及冷卻；instanced billboards 以程序雜訊呈現柔和煙緣，不是流體求解器。非致命 `hit`／`shield` 事件攜帶實際機體及存活狀態，只對存活目標產生短暫亮色閃光與暖色／青色撞擊火花；致命命中走爆炸效果。
+- 暫停凍結 GPU 粒子與震動相位；重新開始／續關清除所有效果。減少動態效果會關閉扭曲與震動、減少煙霧與火花並降低命中閃光，粒子仍會消散。渲染沒有逐幀 CPU readback。
+- Render targets 重用且限制最長邊 2048、總像素 2,073,600；尺寸改變才重建。無 WebGPU、初始化逾時／失敗或 device lost 時釋放 GPU 資源並顯示完整 Canvas 備援，不重開局、不影響運算後端。開始畫面另列渲染模式，所有新模組與 WGSL 納入離線快取。
 
 ### 3.6 計分
 
@@ -146,7 +154,7 @@ WebGPU 不支援、無 adapter、初始化失敗／超過五秒、device lost、
 
 - `src/core/`：固定步長純狀態模擬，不依賴 DOM 或音訊。
 - `src/data/`：所有玩法數值、曲目清單與音色。
-- `src/render/`：預先載入 SVG 與 Canvas 特效。
+- `src/render/`：SVG 預載、WebGPU 機體／粒子／後製管線，以及完整 Canvas 備援。
 - `src/audio/`：OPM.js FM 排程，僅使用者互動後啟動。
 - `src/save/`：有界驗證、明確匯入確認、原檔備援。
 - `app.js`：輸入、介面、三語及模組整合。
