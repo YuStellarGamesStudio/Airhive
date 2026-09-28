@@ -1,0 +1,149 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { Game } from '../src/core/game.js';
+import { GAME } from '../src/data/game.js';
+
+const makeGame = () => {
+  const game = new Game({ random: () => 0.99 });
+  game.start();
+  return game;
+};
+
+const advance = (game, seconds) => {
+  for (let n = 0; n < Math.ceil(seconds / GAME.step); n++) game.update(GAME.step);
+};
+
+test('paused simulation freezes movement, time, timers, bullets, and damage', () => {
+  const game = makeGame();
+  game.slowMotion = 1;
+  game.update(GAME.step);
+  const before = { time: game.time, waveTime: game.waveTime, banner: game.waveBanner,
+    slow: game.slowMotion, x: game.player.x, bullets: game.bullets.map(b => ({ x: b.x, y: b.y })) };
+  game.pause();
+  for (let n = 0; n < 60; n++) game.update(GAME.step, { axis: 1 });
+  game.damagePlayer(100, { obstacle: true });
+  assert.deepEqual({ time: game.time, waveTime: game.waveTime, banner: game.waveBanner,
+    slow: game.slowMotion, x: game.player.x, bullets: game.bullets.map(b => ({ x: b.x, y: b.y })) }, before);
+  assert.equal(game.player.lives, GAME.player.lives);
+  game.resume();
+  game.update(GAME.step, { axis: 1 });
+  assert.ok(game.time > before.time);
+  assert.ok(game.player.x > before.x);
+});
+
+test('two simultaneous obstacles cost exactly one life despite shield, HP and invulnerability', () => {
+  const game = makeGame();
+  game.fireClock = 0;
+  game.player.shield = true;
+  game.player.hp = 75;
+  game.player.invulnerable = 2;
+  for (let n = 0; n < 2; n++) game.obstacles.push({ x: game.player.x, y: game.player.y,
+    w: GAME.obstacleSize, h: GAME.obstacleSize, hp: 3, active: true });
+  game.update(GAME.step);
+  assert.equal(game.player.lives, 2);
+  assert.equal(game.player.hp, GAME.player.hp);
+  assert.equal(game.player.shield, false);
+  assert.equal(game.obstacles.filter(o => o.active).length, 0);
+  game.obstacles.push({ x: game.player.x, y: game.player.y,
+    w: GAME.obstacleSize, h: GAME.obstacleSize, hp: 3, active: true });
+  game.update(GAME.step);
+  assert.equal(game.player.lives, 1, 'a later collision still bypasses respawn invulnerability');
+});
+
+test('boss remains until killed; bomb kills boss for half points and always drops heal', () => {
+  const game = makeGame();
+  game.startWave(10);
+  game.boss.hp = 1_000_000; // Keep the fight alive while exercising the deadline.
+  game.player.invulnerable = Infinity;
+  advance(game, 49);
+  assert.equal(game.wave, 10);
+  assert.equal(game.boss?.type, 'B1');
+  assert.equal(game.boss.active, true);
+  assert.equal(game.obstacles.some(o => o.active), false);
+  for (const escort of game.enemies) if (!escort.boss) escort.active = false;
+  game.score = 0;
+  game.combo = 0;
+  game.collect('bomb');
+  assert.equal(game.boss, null);
+  assert.equal(game.score, 1500);
+  assert.equal(game.pickups.some(p => p.active && p.type === 'heal'), true);
+  assert.ok(game.slowMotion > 0);
+  const time = game.time;
+  game.update(GAME.step);
+  assert.ok(Math.abs(game.time - time - GAME.step * GAME.wave.bossSlowFactor) < 1e-8);
+  advance(game, 16);
+  assert.equal(game.wave, 11);
+});
+
+test('bomb kills all regular enemies with capped combo and half score', () => {
+  const game = makeGame();
+  game.startWave(4);
+  game.combo = 98;
+  for (let n = 0; n < 3; n++) game.enemies.push({ id: 100 + n, type: 'E1', active: true,
+    x: 100 + 60 * n, y: 100, score: 100, boss: false });
+  game.collect('bomb');
+  assert.equal(game.combo, 99);
+  assert.equal(game.kills, 3);
+  assert.equal(game.score, 3 * 100 * 99 / 2);
+  assert.equal(game.enemies.some(e => e.active), false);
+});
+
+test('first drop cannot be missed by a player who never fires into the formation', () => {
+  const game = makeGame();
+  game.player.x = GAME.player.w / 2;
+  advance(game, GAME.wave.firstDropTime + GAME.step);
+  assert.equal(game.wave, 1);
+  assert.equal(game.pickups.some(p => p.active && p.type === 'power'), true);
+});
+
+test('eight boss types rotate after wave 80 without starting obstacles', () => {
+  const game = makeGame();
+  for (let n = 1; n <= 9; n++) {
+    game.startWave(n * GAME.wave.bossEvery);
+    assert.equal(game.boss.type, `B${(n - 1) % GAME.cycleBossCount + 1}`);
+    assert.equal(game.obstacles.length, 0);
+    assert.equal(game.warnings.length, 0);
+  }
+});
+
+test('shared player/enemy projectile pool never exceeds 20 objects or active shots', () => {
+  const game = makeGame();
+  game.startWave(20);
+  game.boss.hp = 1_000_000;
+  game.player.level = GAME.player.maxLevel;
+  game.player.invulnerable = Infinity;
+  for (let n = 0; n < 6 / GAME.step; n++) {
+    game.update(GAME.step);
+    const all = [...game.bullets, ...game.enemyBullets];
+    assert.ok(all.length <= GAME.projectileCap);
+    assert.ok(all.filter(b => b.active).length <= GAME.projectileCap);
+  }
+});
+
+test('a lethal bomb blast makes score and lives terminal before later shot collisions', () => {
+  const game = makeGame();
+  game.startWave(5);
+  game.player.lives = 1; game.player.hp = 20; game.score = 49950;
+  game.fireClock = 0;
+  const enemy = game._spawnEnemy('E1', game.player.x, 200);
+  enemy.hp = 1; enemy.phase = 0;
+  game._bullet(false, enemy.x, enemy.y + GAME.player.bulletSpeed * GAME.step, 0, -GAME.player.bulletSpeed, 1);
+  game._bullet(true, game.player.x + 50, GAME.bombBlastY - 1, 0, 150, 20, { kind: 'bomb' });
+  let result;
+  game.onEvent = (event) => { if (event.type === 'gameover') result = event; };
+  game.update(GAME.step);
+  assert.equal(game.state, 'gameover');
+  assert.equal(game.player.lives, 0);
+  assert.equal(game.score, result.score);
+  assert.equal(game.kills, result.kills);
+});
+
+test('an untimed summoning boss retains only a bounded enemy collection', () => {
+  const game = makeGame();
+  game.startWave(80);
+  game.player.x = GAME.player.w / 2;
+  game.player.invulnerable = Infinity;
+  advance(game, 1800);
+  assert.equal(game.wave, 80);
+  assert.ok(game.enemies.length <= GAME.enemyCap);
+});
