@@ -1,5 +1,5 @@
 // Generated cache metadata is updated by tools/hash-assets.mjs.
-const VERSION = 'airhive-bce52a1dc79ece64';
+const VERSION = 'airhive-e3ae949fa49779f1';
 const PRECACHE = [
   "index.html",
   "LICENSE",

@@ -29,6 +29,7 @@
 - [x] 停掉本機 HTTP server 後重載、FM 開局、移動、暫停、Boss 擊破、結算存檔及再玩。
 - [x] SW 舊版關閉後新版啟用、淘汰舊快取，localStorage 原始字串完全不變。
 - [x] `npm run assets:check`：98 項資產；內容雜湊與精確 URL 快取，不使用 ignoreSearch。
+- [x] Open Graph／Twitter 分享標籤使用正式網域絕對網址；英文分享圖為 1200×630 PNG，本機伺服器回應 `image/png`，且不在 SW 預快取清單。
 
 ## 實測證據與範圍
 

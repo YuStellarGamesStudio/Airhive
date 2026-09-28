@@ -253,6 +253,7 @@ Boss B1–B8 基礎 HP 為 **128／140／156／132／160／160／176／210**；�
 | 部署 | GitHub Pages，CNAME `airhive.yustellar.dev`；遠端倉庫 `https://github.com/YueyuHoshizora/Airhive.git` |
 | PWA | 必做：standalone 安裝、iOS 加入主畫面、離線可玩（飛機模式驗收） |
 | favicon | `favicon.ico` 置根目錄（決議 #26） |
+| 分享預覽 | Open Graph／Twitter `summary_large_image`；英文 1200×630 分享圖 `assets/social/og-image.png`，來源 `tools/share-card.html`；不納入離線快取 |
 | 檔案規範 | 全部資源收 `assets/`，根目錄只放必要檔案；主要 JS 入口命名 `app.js`（決議 #25/#27） |
 | 授權 | **AGPL-3.0**；收錄之 OPM.js 保持其 Apache-2.0（相容） |
 

@@ -1,0 +1,83 @@
+<!doctype html>
+<!-- Source for assets/social/og-image.png. Serve the repository (npm run dev),
+     open /tools/share-card.html at a 1200×630 viewport, device scale 1, and
+     capture the #card element as PNG. Uses the shipped game art directly. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Airhive share card</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #050b14; }
+  #card {
+    position: relative; width: 1200px; height: 630px; overflow: hidden;
+    font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: #eef4ef; background: #07111e;
+  }
+  .sky { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(1.08) contrast(1.06); }
+  .shade {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(90deg, rgba(4,10,20,.94) 0%, rgba(5,13,25,.86) 34%, rgba(6,16,30,.28) 62%, rgba(6,16,30,0) 80%),
+      linear-gradient(180deg, rgba(4,9,18,.35) 0%, rgba(4,9,18,0) 30%, rgba(4,9,18,0) 70%, rgba(3,7,14,.7) 100%);
+  }
+  .sun { position: absolute; left: 820px; top: 330px; width: 520px; height: 380px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255,202,142,.42), rgba(236,142,98,.16) 55%, transparent); filter: blur(4px); }
+  .art { position: absolute; display: block; }
+  .enemy { width: 104px; filter: drop-shadow(0 10px 10px rgba(0,0,0,.45)); }
+  .far { opacity: .78; filter: blur(.6px) drop-shadow(0 8px 8px rgba(0,0,0,.4)) saturate(.8); }
+  .boss { width: 330px; left: 790px; top: 18px; opacity: .92; filter: drop-shadow(0 18px 20px rgba(0,0,0,.55)); }
+  .player { width: 420px; left: 700px; top: 330px; transform: rotate(-9deg); filter: drop-shadow(0 26px 24px rgba(0,0,0,.6)); }
+  .tracer { position: absolute; width: 4px; border-radius: 4px; transform-origin: bottom center;
+    background: linear-gradient(0deg, rgba(255,210,140,0), rgba(255,226,170,.85) 60%, #fffbe8);
+    box-shadow: 0 0 10px 3px rgba(255,170,90,.55), 0 0 26px 8px rgba(255,120,60,.25); }
+  .burst { position: absolute; border-radius: 50%;
+    background: radial-gradient(closest-side, #fff8e2 0%, #ffd08a 18%, rgba(242,120,62,.8) 42%, rgba(120,40,30,.25) 70%, transparent); }
+  .smoke { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(70,78,88,.55), rgba(40,46,56,.25) 60%, transparent); filter: blur(3px); }
+  .copy { position: absolute; left: 72px; top: 70px; width: 600px; }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .brand img { width: 64px; height: 64px; border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,.5); }
+  .brand span { font-size: 22px; font-weight: 700; letter-spacing: .34em; color: #b9cdd2; }
+  h1 { margin: 38px 0 0; font-size: 104px; line-height: .92; font-weight: 800; letter-spacing: .02em;
+    background: linear-gradient(180deg, #ffffff 0%, #e8efe9 46%, #9fb5bd 100%); -webkit-background-clip: text; color: transparent;
+    filter: drop-shadow(0 6px 14px rgba(0,0,0,.55)); }
+  .tagline { margin: 22px 0 0; font-size: 40px; line-height: 1.12; font-weight: 700; color: #f3f1e6; }
+  .tagline em { font-style: normal; color: #ffb078; }
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 30px; width: 700px; }
+  .chips span { padding: 8px 13px; border: 1px solid rgba(160,196,206,.38); border-radius: 999px; font-size: 18px; font-weight: 600;
+    color: #d7e6e6; background: rgba(9,24,40,.66); letter-spacing: .02em; }
+  .footer { position: absolute; left: 72px; bottom: 50px; display: flex; align-items: center; gap: 18px; }
+  .play { padding: 12px 22px; border-radius: 10px; font-size: 21px; font-weight: 800; letter-spacing: .08em; color: #1a0e08;
+    background: linear-gradient(180deg, #ffd29c, #f09456); box-shadow: 0 8px 22px rgba(240,140,80,.35); }
+  .url { font-size: 22px; font-weight: 600; color: #a9c1c8; letter-spacing: .03em; }
+  .frame { position: absolute; inset: 14px; border: 1px solid rgba(190,214,220,.14); border-radius: 18px; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="card">
+  <img class="sky" src="../assets/art/background.svg" alt="">
+  <div class="sun"></div>
+  <img class="art boss far" src="../assets/art/B1.svg" alt="">
+  <img class="art enemy far" style="left:700px;top:150px" src="../assets/art/E1.svg" alt="">
+  <img class="art enemy far" style="left:1090px;top:170px" src="../assets/art/E1.svg" alt="">
+  <img class="art enemy" style="left:760px;top:230px;width:96px" src="../assets/art/E2.svg" alt="">
+  <img class="art enemy" style="left:1010px;top:250px;width:96px" src="../assets/art/E3.svg" alt="">
+  <img class="art enemy" style="left:640px;top:250px;width:84px" src="../assets/art/E5.svg" alt="">
+  <div class="smoke" style="left:870px;top:190px;width:120px;height:90px"></div>
+  <div class="burst" style="left:890px;top:200px;width:84px;height:84px"></div>
+  <div class="tracer" style="left:880px;top:236px;height:160px;transform:rotate(-7deg)"></div>
+  <div class="tracer" style="left:938px;top:226px;height:170px;transform:rotate(-9deg)"></div>
+  <div class="tracer" style="left:996px;top:250px;height:140px;transform:rotate(-12deg)"></div>
+  <img class="art player" src="../assets/art/player.svg" alt="">
+  <div class="shade"></div>
+  <div class="copy">
+    <div class="brand"><img src="../assets/icons/icon-192.png" alt=""><span>AIR DEFENSE COMMAND</span></div>
+    <h1>AIRHIVE</h1>
+    <p class="tagline">Hold the sky.<br><em>Break the swarm.</em></p>
+    <div class="chips"><span>Endless waves</span><span>8 bosses</span><span>Original FM soundtrack</span><span>Plays offline</span></div>
+  </div>
+  <div class="footer"><span class="play">PLAY FREE</span><span class="url">airhive.yustellar.dev</span></div>
+  <div class="frame"></div>
+</div>
+</body>
+</html>

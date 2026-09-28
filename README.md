@@ -56,6 +56,8 @@ The start screen separately shows **compute** (WebGPU / CPU multithreading with 
 Static GitHub Pages repository: <https://github.com/YueyuHoshizora/Airhive>.
 Custom domain: `airhive.yustellar.dev`. The isolated CNAME commit has been pushed as explicitly requested; application commits remain local. `.nojekyll` is included. Enable Pages for the repository root and configure DNS as owner actions. Offline caches never remove localStorage saves; a new release activates after older game tabs close.
 
+Link previews use Open Graph and Twitter card tags with an English 1200×630 image at `assets/social/og-image.png` (absolute URLs on the custom domain). Its source is `tools/share-card.html`, which composes the shipped game art; re-export it after art changes. The share image is excluded from offline caches.
+
 ## License
 
 Airhive: **AGPL-3.0**, see [LICENSE](LICENSE). Provided without warranty; redistribution under the license is permitted. Vendored OPM.js retains **Apache-2.0** and its notices. See [PLAN.md](PLAN.md) for the complete design and [ACCEPTANCE.md](ACCEPTANCE.md) for observed verification and remaining manual checks.
