@@ -12,7 +12,6 @@ export class Renderer {
     if (!this.ctx) throw new Error('Canvas 2D is unavailable');
     this.images = new Map();
     this.loading = null;
-    this.cloud = null;
     this.particles = Array.from({length: V.maxParticles}, () => ({life: 0}));
     this.nextParticle = 0;
     this.elapsed = 0;
@@ -59,39 +58,18 @@ export class Renderer {
         source.onerror = () => reject(new Error(`Unable to load art: ${id}`));
         source.src = new URL(`../../${ASSET_URLS[`assets/art/${id}.svg`]}`, import.meta.url).href;
       });
-      const [w, h] = id === 'background' ? V.dimensions.background
-        : id === 'player' ? V.dimensions.player
-        : id === 'obstacle' ? V.dimensions.obstacle
-        : id[0] === 'B' ? V.dimensions.boss : V.dimensions.enemy;
-      const scale = id === 'background' ? V.skyScale : V.spriteScale;
+      const [w, h] = V.dimensions[id] ?? (id[0] === 'B' ? V.dimensions.boss : V.dimensions.enemy);
+      const scale = id === 'background' || id === 'cloud' ? V.skyScale : V.spriteScale;
       const surface = document.createElement('canvas');
       surface.width = w * scale;
       surface.height = h * scale;
       surface.getContext('2d').drawImage(source, 0, 0, surface.width, surface.height);
       this.images.set(id, surface);
-    })).then(() => { this.makeCloud(); }).catch((error) => {
+    })).catch((error) => {
       this.loading = null;
       throw error;
     });
     return this.loading;
-  }
-
-  makeCloud() {
-    const cloud = document.createElement('canvas');
-    cloud.width = 360;
-    cloud.height = 112;
-    const ctx = cloud.getContext('2d');
-    const fog = ctx.createRadialGradient(180, 64, 8, 180, 64, 168);
-    fog.addColorStop(0, 'rgba(222,235,237,.48)');
-    fog.addColorStop(0.46, 'rgba(162,196,209,.23)');
-    fog.addColorStop(1, 'rgba(122,167,187,0)');
-    ctx.fillStyle = fog;
-    for (const [x, y, rx, ry] of [[83, 68, 79, 27], [145, 49, 81, 34], [205, 56, 94, 40], [277, 68, 80, 27]]) {
-      ctx.beginPath();
-      ctx.ellipse(x, y, rx, ry, 0, 0, TAU);
-      ctx.fill();
-    }
-    this.cloud = cloud;
   }
 
   spawn(x, y, count, kind = 'flame') {
@@ -175,7 +153,8 @@ export class Renderer {
     const sky = this.images.get('background');
     if (sky) ctx.drawImage(sky, 0, 0, V.width, V.height);
     else { ctx.fillStyle = '#101e33'; ctx.fillRect(0, 0, V.width, V.height); }
-    if (!this.cloud) return;
+    const cloud = this.images.get('cloud');
+    if (!cloud) return;
     ctx.save();
     for (let i = 0; i < 7; i++) {
       const near = i > 2;
@@ -184,7 +163,7 @@ export class Renderer {
       const x = ((i * 271 - this.elapsed * speed) % cycle + cycle) % cycle - 350;
       const y = near ? 215 + (i % 3) * 67 : 62 + i * 68;
       ctx.globalAlpha = near ? V.cloudOpacityNear : V.cloudOpacityFar;
-      ctx.drawImage(this.cloud, x, y, near ? 370 : 275, near ? 115 : 76);
+      ctx.drawImage(cloud, x, y, near ? 370 : 275, near ? 115 : 76);
     }
     ctx.restore();
   }
@@ -192,6 +171,7 @@ export class Renderer {
   sprite(ctx, id, entity, bank = 0) {
     const img = this.images.get(id);
     if (!img || !entity || entity.active === false) return;
+    ctx.imageSmoothingQuality = 'high';
     if (!bank) {
       ctx.drawImage(img, entity.x - entity.w / 2, entity.y - entity.h / 2, entity.w, entity.h);
       return;

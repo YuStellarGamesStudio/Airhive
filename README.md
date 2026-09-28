@@ -41,7 +41,7 @@ The entrypoints are `index.html`, `app.js`, and `app.css`. Run `npm run assets:h
 
 ## Implemented / 已實作 / 実装済み
 
-16 enemy types, eight rotating bosses, ten weapon tiers, six automatic pickups, a death/continue/restart flow, layered SVG artwork, 24 original FM scores, separate effects controls, and offline local saves are integrated. The runtime is plain ES modules with vendored OPM.js 1.1.0.
+16 enemy types, eight rotating bosses, ten weapon tiers, six automatic pickups, a death/continue/restart flow, realistic top-down military SVG artwork (per-part relief lighting, panel lines, weathering; hostile craft face the player), 24 original FM scores, separate effects controls, and offline local saves are integrated. The runtime is plain ES modules with vendored OPM.js 1.1.0.
 
 Enemy planning prefers WebGPU compute for formation placement/type selection and aimed/fan projectile geometry; attack timing and state transitions share the CPU's double-precision logic. Movement and collisions stay on the main thread. The CPU module-worker pool starts immediately: reserve one reported logical core, cap at four workers, and precompute up to eight waves with attacks taking priority. If WebGPU is absent, initialization fails or exceeds five seconds, the device is lost, or a GPU job fails/exceeds one second, the same snapshot is replayed on CPU workers without restarting combat. Single-core/unsupported environments and failed or timed-out workers retain synchronous fallback. Both backends and their dependencies work offline; WebGPU requires localhost or HTTPS.
 

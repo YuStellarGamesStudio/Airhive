@@ -34,8 +34,7 @@ struct Vertex {
   return output;
 }
 @fragment fn fragmentMain(input: Vertex) -> @location(0) vec4f {
-  let sample = textureSample(sprites, linearSampler, input.uv, i32(input.layer));
-  let surface = vec4f(sample.rgb * sample.a, sample.a) * input.alpha;
+  let surface = textureSample(sprites, linearSampler, input.uv, i32(input.layer)) * input.alpha;
   let tint = mix(vec3f(2.4, 1.6, .7), vec3f(.6, 2.1, 2.7), input.flash.y);
   return vec4f(surface.rgb + tint * input.flash.x * surface.a, surface.a);
 }`;
@@ -60,7 +59,7 @@ export class GPUSprites {
         color: {srcFactor: 'one', dstFactor: 'one-minus-src-alpha'},
         alpha: {srcFactor: 'one', dstFactor: 'one-minus-src-alpha'},
       }}]}, primitive: {topology: 'triangle-list'}});
-    this.sampler = device.createSampler({minFilter: 'linear', magFilter: 'linear'});
+    this.sampler = device.createSampler({minFilter: 'linear', magFilter: 'linear', mipmapFilter: 'linear'});
     this.attachment = {view: null, loadOp: 'load', storeOp: 'store'};
     this.passDescriptor = {label: 'aircraft instances', colorAttachments: [this.attachment]};
   }
@@ -73,14 +72,29 @@ export class GPUSprites {
       if (!image) throw new Error(`Missing GPU aircraft texture: ${id}`);
       width = Math.max(width, image.width); height = Math.max(height, image.height);
     }
+    // Detailed art is drawn several times smaller than its raster; mip levels keep it from shimmering.
+    const mipLevelCount = Math.max(1, Math.floor(Math.log2(Math.min(width, height) / V.gpuMinMipSize)) + 1);
     this.texture?.destroy();
     this.texture = this.device.createTexture({label: 'aircraft texture array',
-      size: [width, height, IDS.length], format: 'rgba8unorm-srgb',
+      size: [width, height, IDS.length], format: 'rgba8unorm-srgb', mipLevelCount,
       usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT});
     for (let layer = 0; layer < IDS.length; layer++) {
       const id = IDS[layer], image = images.get(id);
-      this.device.queue.copyExternalImageToTexture({source: image},
-        {texture: this.texture, origin: [0, 0, layer], premultipliedAlpha: false}, [image.width, image.height]);
+      let level = image;
+      for (let mipLevel = 0; mipLevel < mipLevelCount; mipLevel++) {
+        if (mipLevel) {
+          const next = document.createElement('canvas');
+          next.width = Math.max(1, image.width >> mipLevel);
+          next.height = Math.max(1, image.height >> mipLevel);
+          const ctx = next.getContext('2d');
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(level, 0, 0, next.width, next.height);
+          level = next;
+        }
+        // Premultiplied storage filters edges without dark fringes.
+        this.device.queue.copyExternalImageToTexture({source: level},
+          {texture: this.texture, mipLevel, origin: [0, 0, layer], premultipliedAlpha: true}, [level.width, level.height]);
+      }
       this.layers.set(id, {layer, u: image.width / width, v: image.height / height});
     }
     this.bindGroup = this.device.createBindGroup({layout: this.pipeline.getBindGroupLayout(0), entries: [

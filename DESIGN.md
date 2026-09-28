@@ -123,10 +123,11 @@ WebGPU 不支援、無 adapter、初始化失敗／超過五秒、device lost、
 
 #### WebGPU 高品質渲染
 
-- 玩家、16 種敵機與八種 Boss 的 SVG 先光柵化為高解析 texture array，僅上傳一次；每幀提交有界 instance buffer，GPU 完成位置、尺寸、轉向傾斜、透明度與受擊閃光。GPU 模式不再用 Canvas 繪製這些機體。
+- 玩家、16 種敵機與八種 Boss 的 SVG 先光柵化為高解析 texture array，僅上傳一次，並以高品質縮小預先產生 mipmap（最小 16 px，premultiplied alpha 避免邊緣暗線）；每幀提交有界 instance buffer，GPU 完成位置、尺寸、轉向傾斜、透明度與受擊閃光。GPU 模式不再用 Canvas 繪製這些機體；Canvas 備援以高品質縮放繪製。
 - 天空／道具底圖與子彈亮芯／HUD 等前景仍由 Canvas 產生，透過 `copyExternalImageToTexture` 合成；HDR 場景經半解析度、四分之一解析度 Gaussian bloom、衝擊波扭曲、衰減震動與高光 tone mapping 後輸出。DOM HUD 與控制鈕不受扭曲。
 - 爆炸煙霧使用 512 格 GPU storage 粒子池：compute 模擬浮升、阻力、渦流、擴散及冷卻；instanced billboards 以程序雜訊呈現柔和煙緣，不是流體求解器。非致命 `hit`／`shield` 事件攜帶實際機體及存活狀態，只對存活目標產生短暫亮色閃光與暖色／青色撞擊火花；致命命中走爆炸效果。
 - 暫停凍結 GPU 粒子與震動相位；重新開始／續關清除所有效果。減少動態效果會關閉扭曲與震動、減少煙霧與火花並降低命中閃光，粒子仍會消散。渲染沒有逐幀 CPU readback。
+- 美術風格：寫實軍武俯視插畫。光源固定左上（azimuth 225°），各機件分別套用浮雕光照，搭配圓柱漸層、刻線、檢修蓋、噴口、掛架、警示塗裝與低對比髒污；禁止白色描邊與卡通光圈。玩家為淺灰制空塗裝、金色座艙罩；敵方為橄欖炭灰系並保留各型辨識色，機首朝下。雲層為獨立 SVG 資產。
 - Render targets 重用且限制最長邊 2048、總像素 2,073,600；尺寸改變才重建。無 WebGPU、初始化逾時／失敗或 device lost 時釋放 GPU 資源並顯示完整 Canvas 備援，不重開局、不影響運算後端。開始畫面另列渲染模式，所有新模組與 WGSL 納入離線快取。
 
 ### 3.6 計分

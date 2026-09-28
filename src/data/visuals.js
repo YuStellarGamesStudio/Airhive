@@ -11,6 +11,7 @@ export const VISUALS = Object.freeze({
   gpuMaxDimension: 2048,
   gpuMaxPixels: 2073600,
   gpuInitTimeout: 5000,
+  gpuMinMipSize: 16,
   bloomStrength: 0.65,
   distortionStrength: 8,
   smokeCapacity: 512,
@@ -56,6 +57,6 @@ export const VISUALS = Object.freeze({
   bossNameY: 48,
   pickupColors: Object.freeze({power:'#f3ba64', homing:'#91dfe6', shield:'#73d6e2', bomb:'#ed877c', life:'#abdfa2', heal:'#d8adbb'}),
   bossPhaseColors: Object.freeze(['#9fdfce', '#f6bd74', '#f06e65']),
-  spriteIds: Object.freeze(['player', ...Array.from({length: 16}, (_, i) => `E${i + 1}`), ...Array.from({length: 8}, (_, i) => `B${i + 1}`), 'obstacle', 'background']),
-  dimensions: Object.freeze({player: [160, 120], enemy: [120, 100], boss: [240, 140], obstacle: [100, 90], background: [960, 540]})
+  spriteIds: Object.freeze(['player', ...Array.from({length: 16}, (_, i) => `E${i + 1}`), ...Array.from({length: 8}, (_, i) => `B${i + 1}`), 'obstacle', 'background', 'cloud']),
+  dimensions: Object.freeze({player: [160, 120], enemy: [120, 100], boss: [240, 140], obstacle: [100, 90], background: [960, 540], cloud: [360, 112]})
 });
