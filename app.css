@@ -648,6 +648,36 @@ footer>span {
 .center-screen .eyebrow {
   margin-bottom:16px
 }
+.death-notice {
+  background:#08121d77;
+  backdrop-filter:none;
+  pointer-events:none
+}
+.death-screen {
+  background:#08121de8;
+  gap:8px;
+  padding:8px
+}
+.center-screen.death-screen h2,.center-screen.death-notice h2 {
+  margin:0
+}
+.center-screen p.death-details:not(.eyebrow) {
+  margin:0;
+  color:var(--accent);
+  font-size:12px
+}
+.death-actions {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:100%
+}
+.death-actions button {
+  min-height:44px;
+  padding:0 12px;
+  font-size:11px
+}
 .results-screen {
   background:#0a1625f7;
   padding:5%;

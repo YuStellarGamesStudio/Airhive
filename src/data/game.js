@@ -32,7 +32,7 @@ export const GAME = Object.freeze({
   player: { x: 480, y: 488, w: 54, h: 44, hp: 100, lives: 3, speed: 320, hitScale: 0.5,
     bulletSpeed: BULLET_SPEED, homingInterval: 0.45, homingSpacing: 18,
     homingSpeed: 610, homingTurn: 4.5, slowFactor: 0.55, slowDuration: 2,
-    invulnerability: 1.6, reviveInvulnerability: 2.5,
+    invulnerability: 1.6, reviveInvulnerability: 2.5, deathDuration: 1.2,
     maxLevel: WEAPONS.length, bulletCap: 64 },
   enemyBulletCap: 60, enemyCap: 90, pickupCap: 16, obstacleCap: 3,
   enemyBulletSpeed: 250, enemyBulletSize: 10, enemyBulletLifetime: 5,

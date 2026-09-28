@@ -18,6 +18,7 @@ export class Renderer {
     this.shake = 0;
     this.flash = 0;
     this.ring = 0;
+    this.ringKind = 'boss';
     this.ringX = V.width / 2;
     this.ringY = V.height / 2;
     this.paused = false;
@@ -90,6 +91,13 @@ export class Renderer {
   }
 
   event({type, x = V.width / 2, y = V.height / 2, boss = false} = {}) {
+    if (type === 'start' || type === 'continue') {
+      for (const p of this.particles) p.life = 0;
+      this.shake = this.flash = this.ring = 0;
+      this.lastPlayerX = null;
+      this.bank = 0;
+      return;
+    }
     if (this.paused) return;
     if (type === 'explosion' || type === 'bomb') {
       const count = boss ? V.bossExplosionParticles : V.explosionParticles;
@@ -98,7 +106,7 @@ export class Renderer {
       this.spawn(x, y, Math.ceil(count / 3), 'debris');
       this.shake = Math.max(this.shake, boss ? V.shakeBoss : V.shakeExplosion);
       this.flash = Math.max(this.flash, boss ? 0.8 : 0.27);
-      if (boss) { this.ring = 1; this.ringX = x; this.ringY = y; }
+      if (boss) { this.ring = 1; this.ringKind = 'boss'; this.ringX = x; this.ringY = y; }
     } else if (type === 'hit' || type === 'shield') {
       this.spawn(x, y, V.hitParticles, type === 'shield' ? 'spark' : 'flame');
       this.shake = Math.max(this.shake, V.shakeHit);
@@ -108,9 +116,16 @@ export class Renderer {
     } else if (type === 'plasma') {
       this.spawn(x, y, V.plasmaParticles, 'spark');
       this.spawn(x, y, 4, 'flame');
-    } else if (type === 'gameover') {
-      this.spawn(x, y, V.bossExplosionParticles, 'smoke');
-      this.shake = V.shakeBoss;
+    } else if (type === 'death') {
+      this.spawn(x, y, V.playerDeathFlames, 'flame');
+      this.spawn(x, y, V.playerDeathSmoke, 'smoke');
+      this.spawn(x, y, V.playerDeathDebris, 'debris');
+      this.shake = Math.max(this.shake, V.shakeDeath);
+      this.flash = Math.max(this.flash, this.reducedMotion ? 0.15 : V.flashDeath);
+      this.ring = this.reducedMotion ? 0 : 1;
+      this.ringKind = 'death';
+      this.ringX = x;
+      this.ringY = y;
     }
   }
 
@@ -158,7 +173,7 @@ export class Renderer {
   }
 
   drawPlayer(ctx, player, active) {
-    if (!player || !active) return;
+    if (!player || !active || player.active === false) return;
     const blink = player.invulnerable > 0 && Math.sin(this.elapsed * 29) > 0.4;
     ctx.save();
     if (blink) ctx.globalAlpha = 0.52;
@@ -271,7 +286,6 @@ export class Renderer {
     } else return false;
     return true;
   }
-
 
   drawShots(ctx, shots, enemy = false) {
     if (!shots) return;
@@ -406,8 +420,7 @@ export class Renderer {
   render(game, dt, {t = (key) => key, reducedMotion = false} = {}) {
     this.resize();
     this.reducedMotion = reducedMotion;
-    const frozen = game?.state === 'paused';
-    this.paused = frozen;
+    const frozen = game && (game.state === 'paused' || game.state === 'death' || game.state === 'gameover');
     const step = frozen ? 0 : clamp(dt || 0, 0, V.maxFrameDelta) * (game?.slowMotion > 0 ? 0.35 : 1);
     if (!frozen) {
       this.elapsed += reducedMotion ? 0 : step;
@@ -437,7 +450,8 @@ export class Renderer {
       }
       this.drawShots(ctx, game.bullets);
       this.drawShots(ctx, game.enemyBullets, true);
-      this.drawPlayer(ctx, game.player, true);
+      this.drawPlayer(ctx, game.player, game.player?.active !== false
+        && game.state !== 'dying' && game.state !== 'death' && game.state !== 'gameover');
       this.drawParticles(ctx, step);
       for (const warning of game.warnings || []) {
         if (warning.active === false) continue;
@@ -447,11 +461,13 @@ export class Renderer {
         ctx.beginPath();ctx.moveTo(warning.x - 22, 5);ctx.lineTo(warning.x + 22, 5);ctx.stroke();
       }
       if (this.ring > 0) {
-        const radius = (1 - this.ring) * V.ringSpeed;
-        ctx.strokeStyle = `rgba(255,214,167,${this.ring * 0.7})`;
+        const radius = (1 - this.ring) * (this.ringKind === 'death' ? V.deathRingSpeed : V.ringSpeed);
+        ctx.strokeStyle = this.ringKind === 'death'
+          ? `rgba(154,228,235,${this.ring * 0.65})`
+          : `rgba(255,214,167,${this.ring * 0.7})`;
         ctx.lineWidth = 3 + this.ring * 5;
         ctx.beginPath();ctx.arc(this.ringX,this.ringY,radius,0,TAU);ctx.stroke();
-        this.ring = Math.max(0, this.ring - step * 0.7);
+        this.ring = Math.max(0, this.ring - step * (this.ringKind === 'death' ? 1.05 : 0.7));
       }
       ctx.restore();
       if (this.flash > 0) {

@@ -35,7 +35,7 @@ let assetsReady = false;
 
 function notify(key) { noticeKey = key; $('notice').textContent = i18n.t(key); $('notice').hidden = false; }
 function persist() {
-  if (game.state === 'playing' || game.state === 'paused') return;
+  if (['playing', 'paused', 'dying', 'death'].includes(game.state)) return;
   try { store.persist(); } catch (error) { notify(error.code); }
 }
 function number(value) { return Math.floor(value).toLocaleString(i18n.language === 'zh' ? 'zh-TW' : i18n.language); }
@@ -43,6 +43,12 @@ function clock(seconds) { return `${Math.floor(seconds / 60)}:${Math.floor(secon
 function setText(id, text) { if ($(id).textContent !== String(text)) $(id).textContent = text; }
 function weaponText() { return `L${game.player.level} · ${i18n.t(`weapon.${WEAPONS[game.player.level - 1].id}`)}`; }
 function pickupText() { return pickupKey === 'pickup.power' ? `${i18n.t(pickupKey)} · ${weaponText()}` : i18n.t(pickupKey); }
+function renderDeath() {
+  const cause = i18n.t(`deathCause.${game.deathReason}`);
+  const lives = `${i18n.t('deathLives')}: ${number(game.player.lives)}`;
+  for (const id of ['death-cause', 'death-notice-cause']) setText(id, cause);
+  for (const id of ['death-lives', 'death-notice-lives']) setText(id, lives);
+}
 function translate() {
   i18n.apply();
   $('language').value = i18n.language;
@@ -75,15 +81,21 @@ function renderRecords() {
   }
 }
 function updateScreen() {
-  const flying = game.state === 'playing' || game.state === 'paused';
+  const flying = ['playing', 'paused', 'dying', 'death'].includes(game.state);
+  const controls = game.state === 'playing' || game.state === 'paused';
   $('home-screen').hidden = game.state !== 'menu';
   $('pause-screen').hidden = game.state !== 'paused';
+  $('death-notice').hidden = game.state !== 'dying';
+  $('death-screen').hidden = game.state !== 'death';
+  $('continue-button').hidden = game.player.lives <= 0;
   $('results-screen').hidden = game.state !== 'gameover';
   $('hud').hidden = !flying;
+  $('pause-button').hidden = !controls;
   $('briefing').hidden = game.state !== 'menu';
-  $('flight-controls').hidden = !flying;
+  $('flight-controls').hidden = !controls;
   $('archive-button').hidden = flying;
-  if (!flying) $('pickup-notice').hidden = true;
+  if (!controls) $('pickup-notice').hidden = true;
+  if (game.state === 'dying' || game.state === 'death') renderDeath();
   document.querySelector('.main').classList.toggle('in-flight', flying);
   $('flight-status').dataset.i18n = flying ? 'live' : 'standby';
   $('flight-status').textContent = i18n.t(flying ? 'live' : 'standby');
@@ -114,7 +126,7 @@ function start() {
   if (!assetsReady) return;
   if ($('archive-dialog').open) $('archive-dialog').close();
   saveCallsign();
-  lastResult = null; recordedDate = null; clearInput(); pickupUntil = 0;
+  lastResult = null; recordedDate = null; clearInput(); pickupUntil = 0; pickupKey = '';
   $('pickup-notice').hidden = true;
   $('save-score').disabled = false; $('save-score').dataset.i18n = 'saveScore'; $('save-score').textContent = i18n.t('saveScore');
   game.start(); accumulator = 0; lastTime = null; updateScreen(); updateHud();
@@ -123,10 +135,19 @@ function start() {
 }
 function handleEvent(event) {
   renderer.event(event);
-  audio.sfx(event.type);
+  if (event.type === 'death') audio.sfx('explosion');
+  else if (event.type !== 'deathmenu' && event.type !== 'continue') audio.sfx(event.type);
   if (event.type === 'pickup') {
     pickupKey = `pickup.${event.pickup}`; pickupUntil = game.time + UI.pickupNotice;
     $('pickup-notice').textContent = pickupText(); $('pickup-notice').hidden = false;
+  }
+  if (event.type === 'death') {
+    clearInput(); pickupUntil = 0; $('pickup-notice').hidden = true;
+    updateScreen(); updateHud();
+  }
+  if (event.type === 'deathmenu') {
+    updateScreen(); updateHud();
+    $('continue-button').focus({ preventScroll: true });
   }
   if (event.type === 'gameover') {
     clearInput(); lastResult = { score: game.score, wave: game.wave, kills: game.kills, time: game.time };
@@ -171,6 +192,13 @@ function parseImport() {
 
 $('start-button').addEventListener('click', start);
 $('retry-button').addEventListener('click', start);
+$('continue-button').addEventListener('click', () => {
+  if (!game.continueChallenge()) return;
+  clearInput(); accumulator = 0; lastTime = null; pickupUntil = 0; pickupKey = '';
+  $('pickup-notice').hidden = true; updateScreen(); updateHud();
+  $('battlefield').focus({ preventScroll: true });
+});
+$('restart-button').addEventListener('click', start);
 $('home-button').addEventListener('click', () => { saveCallsign(); game.state = 'menu'; updateScreen(); $('start-button').focus(); });
 $('pause-button').addEventListener('click', togglePause);
 $('resume-button').addEventListener('click', togglePause);
@@ -291,9 +319,13 @@ motion.addEventListener('change', () => { renderOptions.reducedMotion = motion.m
 function frame(timestamp) {
   const dt = lastTime === null ? 0 : Math.min((timestamp - lastTime) / 1000, UI.maxFrame); lastTime = timestamp;
   input.axis = Number(keys.has('arrowright') || keys.has('d') || directions.has(1)) - Number(keys.has('arrowleft') || keys.has('a') || directions.has(-1));
-  if (game.state === 'playing') {
+  if (game.state === 'playing' || game.state === 'dying') {
     accumulator += dt;
-    while (accumulator >= GAME.step) { game.update(GAME.step, input); accumulator -= GAME.step; }
+    while (accumulator >= GAME.step && (game.state === 'playing' || game.state === 'dying')) {
+      accumulator -= GAME.step;
+      game.update(GAME.step, input);
+    }
+    if (game.state !== 'playing' && game.state !== 'dying') accumulator = 0;
   } else accumulator = 0;
   renderer.render(game, dt, renderOptions);
   hudElapsed += dt;

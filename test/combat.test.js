@@ -41,9 +41,14 @@ test('two simultaneous obstacles cost exactly one life despite shield, HP and in
     w: GAME.obstacleSize, h: GAME.obstacleSize, hp: 3, active: true });
   game.update(GAME.step);
   assert.equal(game.player.lives, 2);
-  assert.equal(game.player.hp, GAME.player.hp);
+  assert.equal(game.state, 'dying');
+  assert.equal(game.player.hp, 0);
   assert.equal(game.player.shield, false);
   assert.equal(game.obstacles.filter(o => o.active).length, 0);
+  advance(game, GAME.player.deathDuration + GAME.step);
+  assert.equal(game.state, 'death');
+  assert.equal(game.continueChallenge(), true);
+  assert.equal(game.player.hp, GAME.player.hp);
   game.obstacles.push({ x: game.player.x, y: game.player.y,
     w: GAME.obstacleSize, h: GAME.obstacleSize, hp: 3, active: true });
   game.update(GAME.step);
@@ -132,6 +137,11 @@ test('a lethal bomb blast makes score and lives terminal before later shot colli
   let result;
   game.onEvent = (event) => { if (event.type === 'gameover') result = event; };
   game.update(GAME.step);
+  assert.equal(game.state, 'dying');
+  assert.equal(game.score, GAME.bonusLifeScore - 50);
+  assert.equal(game.kills, 0);
+  assert.equal(result, undefined);
+  advance(game, GAME.player.deathDuration + GAME.step);
   assert.equal(game.state, 'gameover');
   assert.equal(game.player.lives, 0);
   assert.equal(game.score, result.score);
@@ -231,6 +241,89 @@ test('shields stop piercing rounds and plasma respects radius and one hit per ta
   assert.equal(piercing.active, false);
   assert.equal(shield.hp, 10);
   assert.equal(shield.shield, 0);
+});
+
+test('guided tier reaches off-axis enemies without a pickup and loses that ability below its tier', () => {
+  const game = makeGame();
+  game.startWave(4);
+  game.nextSpawn = game.nextObstacle = Infinity;
+  game.player.x = GAME.player.w / 2;
+  game.player.level = 7;
+  const enemy = game._spawnEnemy('E1', 850, 100);
+  enemy.hp = 100;
+  advance(game, 4);
+  assert.ok(enemy.hp < 100);
+  assert.equal(game.player.homing, false);
+  game.damagePlayer(0, { obstacle: true });
+  advance(game, GAME.player.deathDuration + GAME.step);
+  game.continueChallenge();
+  assert.equal(game.player.level, 6);
+  const hp = enemy.hp;
+  advance(game, 3);
+  assert.equal(enemy.hp, hp);
+});
+
+test('death freezes combat, cannot be bypassed, and continues without resetting progress', () => {
+  const game = makeGame();
+  const events = [];
+  game.onEvent = event => events.push(event.type);
+  game.startWave(21);
+  game.score = 12345;
+  game.player.level = 10;
+  game.player.homing = game.player.shield = true;
+  const enemy = game._spawnEnemy('E1', 100, 100);
+  game.damagePlayer(0, { obstacle: true });
+  const before = { time: game.time, waveTime: game.waveTime, x: game.player.x, enemyY: enemy.y };
+  assert.equal(game.player.active, false);
+  assert.equal(game.player.level, 9);
+  assert.equal(game.collect('power'), false);
+  assert.equal(game.continueChallenge(), false);
+  game.resume(); game.togglePause();
+  assert.equal(game.state, 'dying');
+  advance(game, GAME.player.deathDuration + GAME.step);
+  game.resume(); game.togglePause();
+  game.update(GAME.step, { axis: 1 });
+  assert.equal(game.state, 'death');
+  assert.deepEqual({ time: game.time, waveTime: game.waveTime, x: game.player.x, enemyY: enemy.y }, before);
+  assert.equal(game.continueChallenge(), true);
+  assert.equal(game.continueChallenge(), false);
+  assert.equal(game.state, 'playing');
+  assert.equal(game.wave, 21);
+  assert.equal(game.score, 12345);
+  assert.equal(game.player.lives, 2);
+  assert.equal(game.player.hp, GAME.player.hp);
+  assert.equal(game.player.shield, false);
+  assert.equal(game.player.homing, false);
+  assert.deepEqual(events, ['wave', 'death', 'deathmenu', 'continue']);
+  game.update(GAME.step);
+  assert.ok(game.time > before.time);
+});
+
+test('last-life death emits one delayed result, refuses continue, and restart clears progression', () => {
+  const game = makeGame();
+  const results = [];
+  game.onEvent = event => { if (event.type === 'gameover') results.push(event); };
+  game.startWave(21);
+  for (let n = 0; n < 20; n++) game.collect('power');
+  assert.equal(game.player.level, 10);
+  game.player.lives = 1;
+  game.score = 9876;
+  game.damagePlayer(100);
+  assert.equal(game.state, 'dying');
+  assert.equal(results.length, 0);
+  advance(game, GAME.player.deathDuration + GAME.step);
+  assert.equal(game.state, 'gameover');
+  assert.equal(game.continueChallenge(), false);
+  advance(game, 2);
+  assert.deepEqual(results.map(r => [r.score, r.wave]), [[9876, 21]]);
+  game.start();
+  assert.equal(game.state, 'playing');
+  assert.equal(game.wave, 1);
+  assert.equal(game.score, 0);
+  assert.equal(game.player.level, 1);
+  assert.equal(game.player.lives, 3);
+  assert.equal(game.player.active, true);
+  assert.equal(game.deathReason, null);
 });
 
 test('score lives require crossing a threshold and a large award respects the lifetime cap', () => {

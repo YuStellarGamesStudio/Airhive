@@ -40,6 +40,9 @@ export class Game {
     this.nextId = 1;
     this.fireClock = 0;
     this.homingClock = 0;
+    this.deathTimer = 0;
+    this.deathReason = null;
+    this.lifeLostThisStep = false;
   }
 
   _newPlayer() {
@@ -59,12 +62,31 @@ export class Game {
     this.homingClock = 0;
     this.slowMotion = 0;
     this.firstDrop = false;
+    this.deathTimer = 0;
+    this.deathReason = null;
+    this.lifeLostThisStep = false;
+    this.onEvent({ type: 'start' });
     this.startWave(1);
   }
 
   pause() { if (this.state === 'playing') this.state = 'paused'; }
   resume() { if (this.state === 'paused') this.state = 'playing'; }
   togglePause() { if (this.state === 'paused') this.resume(); else this.pause(); }
+
+  continueChallenge() {
+    if (this.state !== 'death' || this.player.lives <= 0) return false;
+    this.player.hp = GAME.player.hp;
+    this.player.active = true;
+    this.player.invulnerable = GAME.player.reviveInvulnerability;
+    this.lifeLostThisStep = false;
+    this.fireClock = 0;
+    this.homingClock = 0;
+    this.deathReason = null;
+    this.state = 'playing';
+    this.onEvent({ type: 'continue' });
+    return true;
+  }
+
 
   startWave(number) {
     if (this.state !== 'playing' || !Number.isInteger(number) || number < 1) return;
@@ -106,9 +128,20 @@ export class Game {
   }
 
   update(dt, input = {}) {
-    if (this.state !== 'playing' || !Number.isFinite(dt) || dt <= 0) return;
+    if (!Number.isFinite(dt) || dt <= 0) return;
     // A caller normally passes GAME.step; a long frame cannot skip collisions or timers.
     let remaining = Math.min(dt, GAME.step * GAME.maxStepsPerUpdate);
+    if (this.state === 'dying') {
+      this.deathTimer = Math.max(0, this.deathTimer - remaining);
+      if (this.deathTimer === 0) {
+        this.state = this.player.lives > 0 ? 'death' : 'gameover';
+        this.onEvent({ type: this.state === 'death' ? 'deathmenu' : 'gameover',
+          lives: this.player.lives, reason: this.deathReason,
+          score: this.score, wave: this.wave, kills: this.kills, time: this.time });
+      }
+      return;
+    }
+    if (this.state !== 'playing') return;
     while (remaining > 0 && this.state === 'playing') {
       const slice = Math.min(remaining, GAME.step);
       this._step(slice * (this.slowMotion > 0 ? GAME.wave.bossSlowFactor : 1), input);
@@ -694,7 +727,7 @@ export class Game {
     if (obstacle) {
       if (this.lifeLostThisStep) return false;
       this.combo = 0;
-      this._loseLife();
+      this._loseLife('obstacle');
       return true;
     }
     if (!Number.isFinite(amount) || amount <= 0 || p.invulnerable > 0) return false;
@@ -718,25 +751,28 @@ export class Game {
     return true;
   }
 
-  _loseLife() {
+  _loseLife(reason = 'damage') {
     if (this.lifeLostThisStep) return;
     this.lifeLostThisStep = true;
     const p = this.player;
     p.lives--;
-    p.hp = GAME.player.hp;
+    p.hp = 0;
+    p.active = false;
     p.level = Math.max(1, p.level - 1);
     p.homing = false;
     p.shield = false;
     p.slow = 0;
-    p.invulnerable = GAME.player.reviveInvulnerability;
+    p.invulnerable = 0;
+    this.slowMotion = 0;
+    this.state = 'dying';
+    this.deathTimer = GAME.player.deathDuration;
+    this.deathReason = reason;
     for (const pickup of this.pickups) pickup.active = false;
-    for (const bullet of this.enemyBullets) bullet.active = false;
-    this.onEvent({ type: 'explosion', x: p.x, y: p.y });
-    if (p.lives <= 0) {
-      p.hp = 0;
-      this.state = 'gameover';
-      this.onEvent({ type: 'gameover', score: this.score, wave: this.wave, kills: this.kills, time: this.time });
-    }
+    for (const pool of [this.bullets, this.enemyBullets]) for (const bullet of pool) bullet.active = false;
+    // Remove only wreckage already touching the lost aircraft, not the rest of the battlefield.
+    for (const obstacle of this.obstacles)
+      if (obstacle.active && overlaps(p, obstacle, GAME.player.hitScale)) obstacle.active = false;
+    this.onEvent({ type: 'death', x: p.x, y: p.y, lives: p.lives, reason });
   }
 
   _kill(e, bomb = false) {
