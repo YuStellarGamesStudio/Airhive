@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1520">
+  <meta name="description" content="Airhive — a fixed-turret air combat arcade game. One aircraft. An endless horizon. Offline-ready, powered by original FM synthesis.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Airhive</title>
+  <link rel="icon" href="favicon.ico?v=61e3b43cc7c3a8e2" sizes="any">
+  <link rel="icon" href="assets/icons/mark.svg?v=50614bb3d3fd2097" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png?v=d9e7abb8075b0894">
+  <link rel="manifest" href="manifest.webmanifest?v=63e7744dd5900283">
+  <link rel="stylesheet" href="app.css?v=32bbbf92c02d9b8d">
+  <!-- ASSET_IMPORTS_START -->
+  <script type="importmap">{"imports":{"./app.js":"./app.js?v=f2e14741288cd3c8","./src/audio/audio.js":"./src/audio/audio.js?v=d91a95afa4301835","./src/core/game.js":"./src/core/game.js?v=34644455e98e4da3","./src/data/assets.js":"./src/data/assets.js?v=cea0a0a16e1f1086","./src/data/audio.js":"./src/data/audio.js?v=70ecc15afaf49b38","./src/data/game.js":"./src/data/game.js?v=a932704dc08373b0","./src/data/settings.js":"./src/data/settings.js?v=72e6e6ab5d33938c","./src/data/visuals.js":"./src/data/visuals.js?v=b4bd56e16f0682cd","./src/i18n/index.js":"./src/i18n/index.js?v=c61a00ffe4008ca1","./src/i18n/strings.js":"./src/i18n/strings.js?v=844a55dc984b2098","./src/render/renderer.js":"./src/render/renderer.js?v=8636ace8b8bf9d1a","./src/save/storage.js":"./src/save/storage.js?v=9053b22ddad9296b","./src/vendor/opm/dist/api/index.js":"./src/vendor/opm/dist/api/index.js?v=b61618d9e57a05d3","./src/vendor/opm/dist/chunks/3LW4LAXR.js":"./src/vendor/opm/dist/chunks/3LW4LAXR.js?v=5120c2a46f1ce56b","./src/vendor/opm/dist/chunks/MUROU3LE.js":"./src/vendor/opm/dist/chunks/MUROU3LE.js?v=cb5cf3a374b821a7","./src/vendor/opm/dist/chunks/PMWEZUON.js":"./src/vendor/opm/dist/chunks/PMWEZUON.js?v=dbc68ed4d67c4206","./src/vendor/opm/dist/chunks/YTCTYSST.js":"./src/vendor/opm/dist/chunks/YTCTYSST.js?v=a52fc70f69f972bb","./src/vendor/opm/dist/core/index.js":"./src/vendor/opm/dist/core/index.js?v=6835365235a20ee2","./src/vendor/opm/dist/voices/brass.js":"./src/vendor/opm/dist/voices/brass.js?v=afeeb22b4c1aa73e","./src/vendor/opm/dist/voices/normalize.js":"./src/vendor/opm/dist/voices/normalize.js?v=2e923c9f5a8817c2","./src/vendor/opm/dist/voices/schema.js":"./src/vendor/opm/dist/voices/schema.js?v=f896fe79dde938ae","./src/vendor/opm/dist/worklet/processor.js":"./src/vendor/opm/dist/worklet/processor.js?v=29ce6e420434b286"}}</script>
+  <!-- ASSET_IMPORTS_END -->
+</head>
+<body>
+  <div class="shell">
+    <header class="masthead">
+      <a class="brand" href="./" aria-label="Airhive"><img src="assets/icons/mark.svg?v=50614bb3d3fd2097" alt="" width="36" height="36"><span>AIRHIVE<small data-i18n="sector">AIR DEFENSE COMMAND</small></span></a>
+      <nav class="toolbar" aria-label="Settings">
+        <button id="archive-button" class="text-button" data-i18n="archive">Save data</button>
+        <button id="audio-button" class="text-button" aria-expanded="false" aria-controls="audio-panel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 5 9H2v6h3l6 4V5Zm4 3a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg><span data-i18n="sound">Audio</span></button>
+        <label class="language-control"><span class="sr-only" data-i18n="language">Language</span><select id="language" aria-label="Language"><option value="en">EN</option><option value="zh">繁中</option><option value="ja">日本語</option></select></label>
+      </nav>
+    </header>
+
+    <main class="main">
+      <div class="flight-strip"><span><i class="status-dot"></i><span id="flight-status" data-i18n="standby">STANDING BY</span></span><span class="strip-center" data-i18n="operation">OPERATION AIRHIVE</span><span id="best-label"><span data-i18n="record">PERSONAL BEST</span> <strong id="best-score">000000</strong></span></div>
+      <section class="battle-shell" aria-label="Airhive">
+        <div id="hud" class="hud" hidden>
+          <div class="hud-score"><span data-i18n="score">Score</span><strong id="score">000000</strong></div>
+          <div><span data-i18n="wave">Wave</span><strong id="wave">01</strong></div>
+          <div class="hud-hull"><div><span data-i18n="hp">Hull</span><strong id="hp-value">100</strong></div><meter id="hp" min="0" max="100" value="100">100</meter></div>
+          <div><span data-i18n="lives">Lives</span><strong id="lives">03</strong></div>
+          <div class="hud-weapon"><span data-i18n="weapon">Firepower</span><strong id="weapon">L1</strong></div>
+          <div class="hud-combo"><span data-i18n="combo">Combo</span><strong id="combo">×1</strong></div>
+          <button id="pause-button" class="icon-button" data-i18n-label="pause" aria-label="Pause"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg></button>
+        </div>
+        <div class="viewport">
+          <canvas id="battlefield" width="960" height="540" tabindex="0" aria-label="Airhive battlefield"></canvas>
+          <section id="home-screen" class="home-screen screen">
+            <div class="hero-copy"><p class="eyebrow"><span class="tiny-line"></span><span data-i18n="tagline">THE LAST LINE OF DEFENSE</span></p><h1><span data-i18n="headline">Hold the sky.</span><br><em data-i18n="headlineAccent">Break the swarm.</em></h1><p class="intro" data-i18n="intro">One aircraft. An endless horizon. Stand your ground against the swarm and leave your mark on the leaderboard.</p><button id="start-button" class="primary" disabled><span data-i18n="loading">Preparing aircraft…</span><span aria-hidden="true">↗</span></button><p class="auto-label"><span class="crosshair" aria-hidden="true">+</span><span data-i18n="auto">AUTO-FIRE ENGAGED</span></p></div>
+            <div class="hero-aircraft" aria-hidden="true"><div class="radar-ring"></div><div class="radar-ring inner"></div><div class="target-axis"></div><img src="assets/art/player.svg?v=88f6367263b5642f" alt=""><div class="aircraft-label"><span data-i18n="aircraft">F/A–07 KESTREL</span><small data-i18n="aircraftNote">INTERCEPTOR / COMBAT READY</small></div><span class="coordinate coord-top">07 / 960.540</span><span class="coordinate coord-bottom">35° 41′ N · 139° 41′ E</span></div>
+            <div class="hero-bottom"><span><kbd>←</kbd><kbd>→</kbd><span data-i18n="moveHelp">Arrow keys or A / D</span></span><span><kbd>P</kbd><span data-i18n="pauseHelp">P / Esc to pause</span></span></div>
+          </section>
+          <section id="pause-screen" class="center-screen screen" hidden><p class="eyebrow" data-i18n="operation">OPERATION AIRHIVE</p><h2 data-i18n="paused">Sortie paused</h2><p data-i18n="pauseHint">Take a breath. The sky can wait.</p><button id="resume-button" class="primary" data-i18n="resume">Resume sortie</button></section>
+          <section id="results-screen" class="results-screen screen" hidden><div class="result-summary"><p class="eyebrow" data-i18n="gameover">SORTIE COMPLETE</p><h2 data-i18n="gameoverTitle">Every flight leaves a mark.</h2><span id="new-record" class="new-record" data-i18n="newRecord" hidden>NEW PERSONAL BEST</span><span class="result-label" data-i18n="finalScore">FINAL SCORE</span><strong id="result-score" class="result-score">0</strong><div class="result-stats"><span><b id="result-wave">1</b><small data-i18n="wave">Wave</small></span><span><b id="result-kills">0</b><small data-i18n="kills">Aircraft downed</small></span><span><b id="result-time">0:00</b><small data-i18n="flightTime">Flight time</small></span></div><div class="result-actions"><button id="retry-button" class="primary" data-i18n="retry">Fly again</button><button id="home-button" class="text-button" data-i18n="home">Return to base</button></div></div><div class="result-records"><form id="callsign-form"><label for="callsign" data-i18n="callsign">Your callsign</label><div class="callsign-row"><input id="callsign" maxlength="3" minlength="3" pattern="[A-Za-z0-9]{3}" value="ACE" autocomplete="off" spellcheck="false" required aria-describedby="callsign-hint"><button id="save-score" class="secondary" type="submit" data-i18n="saveScore">Register score</button></div><small id="callsign-hint" data-i18n="callsignHint">3 letters or numbers</small></form><h3 data-i18n="leaderboard">Flight records</h3><ol id="result-leaderboard" class="leaderboard"></ol></div></section>
+          <div id="pickup-notice" class="pickup-notice" role="status" hidden></div>
+          <div class="corner top-left"></div><div class="corner top-right"></div><div class="corner bottom-left"></div><div class="corner bottom-right"></div>
+        </div>
+      </section>
+      <section id="briefing" class="briefing"><article><span class="brief-number">01</span><div><h2 data-i18n="controlsTitle">You steer. We fire.</h2><p data-i18n="controlsHelp">Move left and right. Every weapon fires automatically.</p></div></article><article><span class="brief-number">02</span><div><h2 data-i18n="dangerTitle">Mind the wreckage</h2><p data-i18n="dangerHelp">A collision costs a life — shields cannot help.</p></div></article><article class="brief-record"><div><h2 data-i18n="leaderboard">Flight records</h2><ol id="home-leaderboard" class="leaderboard compact"></ol></div></article></section>
+      <div id="flight-controls" class="flight-controls" hidden><div class="direction-controls"><button id="left-button" class="direction" aria-label="Move left">←</button><button id="right-button" class="direction" aria-label="Move right">→</button><span class="control-help" data-i18n="touchHelp">Drag to move · arrows also work</span></div><span id="equipment"></span><span class="firing-status"><i class="status-dot"></i><span data-i18n="autoShort">Auto-fire</span></span></div>
+    </main>
+    <footer><span id="system-status"><i class="status-dot"></i><span data-i18n="ready">SYSTEMS READY</span></span><span class="footer-center">AIRHIVE <span class="footer-divider">/</span> 01.00</span><span><a href="https://github.com/YueyuHoshizora/Airhive" target="_blank" rel="noopener" data-i18n="source">Source</a><span class="footer-divider">/</span><a href="LICENSE?v=0d96a4ff68ad6d4b" target="_blank" rel="noopener" data-i18n="license">AGPL-3.0 · no warranty</a></span></footer>
+  </div>
+
+  <section id="audio-panel" class="audio-panel" aria-labelledby="audio-title" hidden><div class="panel-heading"><h2 id="audio-title" data-i18n="soundTitle">Sound control</h2><button id="audio-close" class="icon-button" data-i18n-label="close" aria-label="Close">×</button></div><div class="audio-channel"><label class="toggle-label"><span data-i18n="bgm">Music</span><input id="bgm-enabled" type="checkbox" checked></label><div class="range-row"><input id="bgm-volume" type="range" min="0" max="100" value="60" data-i18n-label="bgm" aria-label="Music"><output id="bgm-output">60</output></div></div><div class="audio-channel"><label class="toggle-label"><span data-i18n="sfx">Sound effects</span><input id="sfx-enabled" type="checkbox" checked></label><div class="range-row"><input id="sfx-volume" type="range" min="0" max="100" value="70" data-i18n-label="sfx" aria-label="Sound effects"><output id="sfx-output">70</output></div></div><small id="track-name"></small></section>
+  <dialog id="archive-dialog" class="archive-dialog">
+    <div class="panel-heading"><h2 data-i18n="archiveTitle">Pilot archive</h2><button id="archive-close" class="icon-button" data-i18n-label="close" aria-label="Close">×</button></div>
+    <div id="archive-stats" class="archive-stats"></div>
+    <div class="archive-editor">
+      <p data-i18n="archiveHelp">Your records stay on this device. Export a copy to take them with you.</p>
+      <div class="archive-actions">
+        <button id="export-file" class="secondary" data-i18n="exportFile">Download JSON</button>
+        <button id="export-code" class="secondary" data-i18n="exportCode">Generate save code</button>
+        <label class="secondary file-label" tabindex="0"><span data-i18n="importFile">Choose JSON</span><input id="import-file" type="file" accept="application/json,.json"></label>
+      </div>
+      <label for="save-code" data-i18n="saveCode">Save code / JSON</label>
+      <textarea id="save-code" rows="3" maxlength="131072" spellcheck="false" data-i18n-placeholder="importHint" placeholder="Paste a save code or JSON here"></textarea>
+      <button id="preview-import" class="secondary" data-i18n="preview">Preview import</button>
+    </div>
+    <section id="import-preview" class="import-preview" hidden>
+      <p id="preview-summary"></p>
+      <p class="muted" data-i18n="backupNotice">Your current save will be backed up before replacement.</p>
+      <button id="confirm-import" class="primary" data-i18n="confirmImport">Back up & import</button>
+      <button id="cancel-import" class="secondary" data-i18n="cancel">Cancel</button>
+    </section>
+    <p id="archive-message" role="status"></p>
+  </dialog>
+  <div id="notice" class="notice" role="status" hidden></div>
+  <script type="module" src="app.js?v=f2e14741288cd3c8"></script>
+</body>
+</html>
