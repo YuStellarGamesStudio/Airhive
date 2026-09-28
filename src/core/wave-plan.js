@@ -2,12 +2,11 @@ import { GAME, FORMATIONS } from '../data/game.js';
 
 export const PLAN_STRIDE = 3;
 
-// Plans contain only wave-dependent data; random rolls stay on the simulation thread.
-export function planWave(wave) {
-  if (wave % GAME.wave.bossEvery === 0) return new Float64Array(0);
+// Layout decisions stay in JS doubles; the GPU only evaluates per-slot geometry and selection.
+export function waveLayout(wave) {
+  if (wave % GAME.wave.bossEvery === 0) return null;
   const count = Math.min(GAME.enemyCap, Math.round(GAME.wave.density * Math.min(GAME.wave.countCap,
     GAME.wave.baseCount + Math.floor((wave - 1) / GAME.wave.growthEvery))));
-  const plan = new Float64Array(count * PLAN_STRIDE);
   const profile = FORMATIONS[(wave - 1) % FORMATIONS.length];
   const columns = Math.round(profile.columns * GAME.wave.density);
   const spacing = Math.min(GAME.wave.columnSpacing,
@@ -16,6 +15,15 @@ export function planWave(wave) {
     Math.max(0, wave - GAME.wave.unlockStart + 1) * GAME.wave.unlockPerWave);
   const introduction = wave === GAME.wave.lifeEvery + 1 ? GAME.wave.lifeEvery : wave;
   const newly = GAME.earlyTypeCount + (introduction - GAME.wave.unlockStart) * GAME.wave.unlockPerWave;
+  return { count, profile, columns, spacing, unlocked, introduction, newly };
+}
+
+// Plans contain only wave-dependent data; random rolls stay on the simulation thread.
+export function planWave(wave) {
+  const layout = waveLayout(wave);
+  if (!layout) return new Float64Array(0);
+  const { count, profile, columns, spacing, unlocked, introduction, newly } = layout;
+  const plan = new Float64Array(count * PLAN_STRIDE);
   for (let slot = 0; slot < count; slot++) {
     const column = slot % columns;
     const row = Math.floor(slot / columns);

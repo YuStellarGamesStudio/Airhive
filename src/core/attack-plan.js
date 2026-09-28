@@ -31,21 +31,21 @@ function summon(result, enemyType, x, y) {
   result.commands.push({ type: 'spawn', enemyType, x, y });
 }
 
-function regularAttack(result, enemy, player, cadence) {
+function regularAttack(result, enemy, player, cadence, geometry) {
   const attack = MOTION.attack;
   switch (enemy.behavior) {
     case 'dive':
       if (enemy.diving && enemy.actionTimer >= MOTION.dive.shotAt && !result.burst) {
-        aim(result, enemy, player, attack.enemyBullet); result.burst = 1;
+        geometry.aim(result, enemy, player, attack.enemyBullet); result.burst = 1;
       }
       break;
     case 'intercept':
       if (enemy.diving && result.burst && result.shotTimer > attack.intercept) {
-        aim(result, enemy, player, attack.enemyBullet); result.shotTimer = 0; result.burst--;
+        geometry.aim(result, enemy, player, attack.enemyBullet); result.shotTimer = 0; result.burst--;
       }
       break;
     case 'scatter': if (result.shotTimer >= (attack.scatter + enemy.phase / TAU) * cadence) {
-      fan(result, enemy, player, attack.scatterCount, attack.scatterAngle, attack.enemyBullet);
+      geometry.fan(result, enemy, player, attack.scatterCount, attack.scatterAngle, attack.enemyBullet);
       result.shotTimer = 0;
     } break;
     case 'bomber': if (result.shotTimer >= attack.bomber * cadence) {
@@ -57,21 +57,21 @@ function regularAttack(result, enemy, player, cadence) {
         result.burst = attack.launcherBurst; result.shotTimer = 0;
       }
       if (result.burst && result.shotTimer >= attack.burstGap) {
-        aim(result, enemy, player, GAME.missileSpeed, { kind: 'missile' });
+        geometry.aim(result, enemy, player, GAME.missileSpeed, { kind: 'missile' });
         result.shotTimer = 0; result.burst--;
       }
       break;
     case 'cloak': if (!enemy.invisible && result.shotTimer >= attack.cloak * cadence) {
-      aim(result, enemy, player, attack.enemyBullet); result.shotTimer = 0;
+      geometry.aim(result, enemy, player, attack.enemyBullet); result.shotTimer = 0;
     } break;
     case 'jammer': if (result.shotTimer >= attack.jammer * cadence) {
-      aim(result, enemy, player, attack.enemyBullet, { slow: true }); result.shotTimer = 0;
+      geometry.aim(result, enemy, player, attack.enemyBullet, { slow: true }); result.shotTimer = 0;
     } break;
     case 'minelayer': if (result.shotTimer >= attack.mine * cadence) {
       mine(result, enemy.x, enemy.y, enemy.damage); result.shotTimer = 0;
     } break;
     case 'spiral': if (result.shotTimer >= attack.spiral * cadence) {
-      fan(result, enemy, player, attack.spiralCount, TAU / attack.spiralCount,
+      geometry.fan(result, enemy, player, attack.spiralCount, TAU / attack.spiralCount,
         attack.enemyBullet, enemy.damage, enemy.age); result.shotTimer = 0;
     } break;
     case 'carrier': if (result.shotTimer >= MOTION.carrier.summonInterval * cadence) {
@@ -81,7 +81,7 @@ function regularAttack(result, enemy, player, cadence) {
   }
 }
 
-function bossAttack(result, enemy, player) {
+function bossAttack(result, enemy, player, geometry) {
   const boss = GAME.boss, patterns = boss.patterns;
   const interval = enemy.behavior === 'minefield' ? patterns.minefield.interval : boss.fireInterval;
   if (result.shotTimer < interval || (enemy.behavior === 'assassin' && enemy.invisible)) return;
@@ -89,7 +89,7 @@ function bossAttack(result, enemy, player) {
   const speed = GAME.enemyBulletSpeed;
   switch (enemy.behavior) {
     case 'hive':
-      fan(result, enemy, player, patterns.hive.count, patterns.hive.spread, speed);
+      geometry.fan(result, enemy, player, patterns.hive.count, patterns.hive.spread, speed);
       result.summonTimer += interval;
       if (result.summonTimer >= boss.spawnInterval) {
         result.summonTimer = 0;
@@ -100,19 +100,19 @@ function bossAttack(result, enemy, player) {
     case 'crossfire':
       for (let side = -1; side <= 1; side += 2) {
         const turretX = side * enemy.w * patterns.crossfire.turretOffset;
-        fan(result, enemy, player, patterns.crossfire.count, patterns.crossfire.spread, speed, enemy.damage,
+        geometry.fan(result, enemy, player, patterns.crossfire.count, patterns.crossfire.spread, speed, enemy.damage,
           Math.atan2(player.x - enemy.x - turretX - side * patterns.crossfire.lead,
             player.y - enemy.y), turretX);
       }
       break;
     case 'fortress':
-      fan(result, enemy, player, patterns.fortress.count, patterns.fortress.spread, speed);
+      geometry.fan(result, enemy, player, patterns.fortress.count, patterns.fortress.spread, speed);
       if (Math.floor(enemy.age / interval) % patterns.fortress.laserEvery === 0)
         bullet(result, player.x, enemy.y + enemy.h / 2, 0, boss.laserSpeed, enemy.damage,
           { kind: 'laser', w: boss.laserWidth, h: boss.laserWidth, delay: boss.laserTelegraph });
       break;
     case 'assassin':
-      fan(result, enemy, player, patterns.assassin.count, patterns.assassin.spread,
+      geometry.fan(result, enemy, player, patterns.assassin.count, patterns.assassin.spread,
         speed * patterns.assassin.speedFactor);
       break;
     case 'minefield':
@@ -134,28 +134,29 @@ function bossAttack(result, enemy, player) {
       }
       break;
     case 'plasma':
-      fan(result, enemy, player, patterns.plasma.count, TAU / patterns.plasma.count,
+      geometry.fan(result, enemy, player, patterns.plasma.count, TAU / patterns.plasma.count,
         speed, patterns.plasma.damage, enemy.age);
       break;
     case 'abyss':
       if (enemy.phaseIndex === 0)
-        fan(result, enemy, player, patterns.abyss.barrage, patterns.abyss.barrageSpread, speed);
+        geometry.fan(result, enemy, player, patterns.abyss.barrage, patterns.abyss.barrageSpread, speed);
       else if (enemy.phaseIndex === 1) {
         result.summonTimer += interval;
         if (result.summonTimer >= boss.spawnInterval) {
           result.summonTimer = 0;
           summon(result, 'E5', enemy.x, enemy.y + enemy.h / 2);
         }
-        fan(result, enemy, player, patterns.abyss.escort, patterns.abyss.escortSpread, speed);
-      } else fan(result, enemy, player, patterns.abyss.spiral, TAU / patterns.abyss.spiral,
+        geometry.fan(result, enemy, player, patterns.abyss.escort, patterns.abyss.escortSpread, speed);
+      } else geometry.fan(result, enemy, player, patterns.abyss.spiral, TAU / patterns.abyss.spiral,
         speed, enemy.damage, enemy.age);
       break;
     default: break;
   }
 }
 
-// Worker and single-thread paths share these decisions; only the caller commits effects.
-export function planAttacks({ wave, player, enemies }) {
+// All backends share double-precision decisions; only the caller commits effects.
+const CPU_GEOMETRY = Object.freeze({ aim, fan });
+export function planAttacks({ wave, player, enemies }, geometry = CPU_GEOMETRY) {
   const results = [];
   const cadence = Math.max(GAME.enemyFireFloor,
     GAME.enemyShotInterval - Math.floor((wave - 1) / GAME.shotDensityEvery) *
@@ -164,8 +165,8 @@ export function planAttacks({ wave, player, enemies }) {
     if (!hasAttack(enemy)) continue;
     const result = { id: enemy.id, shotTimer: enemy.shotTimer, burst: enemy.burst,
       summonTimer: enemy.summonTimer, commands: [] };
-    if (enemy.boss) bossAttack(result, enemy, player);
-    else regularAttack(result, enemy, player, cadence);
+    if (enemy.boss) bossAttack(result, enemy, player, geometry);
+    else regularAttack(result, enemy, player, cadence, geometry);
     if (result.commands.length || result.shotTimer !== enemy.shotTimer ||
       result.burst !== enemy.burst || result.summonTimer !== enemy.summonTimer) results.push(result);
   }

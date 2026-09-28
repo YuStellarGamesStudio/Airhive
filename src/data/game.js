@@ -35,7 +35,7 @@ export const GAME = Object.freeze({
     invulnerability: 1.6, reviveInvulnerability: 2.5, deathDuration: 1.2,
     maxLevel: WEAPONS.length, bulletCap: 64 },
   enemyBulletCap: 60, enemyCap: 90, pickupCap: 16, obstacleCap: 3,
-  spawnPlanning: { maxWorkers: 4, lookahead: 8, jobTimeout: 1000 },
+  spawnPlanning: { maxWorkers: 4, lookahead: 8, jobTimeout: 1000, gpuInitTimeout: 5000 },
   enemyBulletSpeed: 250, enemyBulletSize: 10, enemyBulletLifetime: 5,
   enemyShotInterval: 3.2, enemyShotStagger: 0.85, enemyFireFloor: 1.25,
   enemySize: { w: 42, h: 36 }, bossSize: { w: 138, h: 92 },
