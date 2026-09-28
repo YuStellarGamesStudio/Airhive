@@ -1,7 +1,7 @@
 import { GAME, MOTION } from '../data/game.js';
 
 const TAU = Math.PI * 2;
-const attacking = new Set(['dive', 'scatter', 'bomber', 'tracker', 'cloak', 'jammer',
+const attacking = new Set(['dive', 'scatter', 'bomber', 'launcher', 'cloak', 'jammer',
   'minelayer', 'intercept', 'spiral', 'carrier']);
 
 export const hasAttack = enemy => enemy.boss || attacking.has(enemy.behavior);
@@ -52,12 +52,12 @@ function regularAttack(result, enemy, player, cadence) {
       bullet(result, enemy.x, enemy.y + enemy.h / 2, 0, attack.bombSpeed, enemy.damage,
         { kind: 'bomb', w: GAME.mineSize, h: GAME.mineSize }); result.shotTimer = 0;
     } break;
-    case 'tracker':
-      if (!result.burst && result.shotTimer >= attack.tracker * cadence) {
-        result.burst = attack.trackerBurst; result.shotTimer = 0;
+    case 'launcher':
+      if (!result.burst && result.shotTimer >= attack.launcher * cadence) {
+        result.burst = attack.launcherBurst; result.shotTimer = 0;
       }
-      if (result.burst && result.shotTimer >= attack.trackingGap) {
-        aim(result, enemy, player, GAME.missileSpeed, { kind: 'missile', homing: true });
+      if (result.burst && result.shotTimer >= attack.burstGap) {
+        aim(result, enemy, player, GAME.missileSpeed, { kind: 'missile' });
         result.shotTimer = 0; result.burst--;
       }
       break;
@@ -125,7 +125,7 @@ function bossAttack(result, enemy, player) {
         const offset = i - (patterns.missiles.count - 1) / 2;
         bullet(result, enemy.x + offset * patterns.missiles.spacing, enemy.y + enemy.h / 2,
           offset * patterns.missiles.spread, GAME.missileSpeed, enemy.damage,
-          { kind: 'missile', homing: true });
+          { kind: 'missile' });
       }
       result.summonTimer += interval;
       if (result.summonTimer >= boss.spawnInterval) {

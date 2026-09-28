@@ -207,7 +207,7 @@ test('startup, posting, and worker errors disable the pool without retrying', ()
   crashed.dispose();
 });
 
-test('real module workers preserve spawn plans and saturated-bullet combat outcomes', async () => {
+test('real module workers preserve saturated combat and enemy missiles keep their launch heading', async () => {
   const threads = [];
   class DOMWorker {
     constructor(url, options) {
@@ -252,6 +252,33 @@ test('real module workers preserve spawn plans and saturated-bullet combat outco
     const combat = game => ({ time: game.time, player: game.player, enemies: game.enemies,
       bullets: game.bullets, enemyBullets: game.enemyBullets, score: game.score });
     assert.deepEqual(combat(threaded), combat(sync));
+    for (const [wave, volleySize] of [[6, 1], [60, 6]]) {
+      for (const game of [sync, threaded]) {
+        game.start(); game.startWave(wave);
+        game.nextSpawn = game.nextObstacle = Infinity;
+        game.fireClock = -1000;
+        game.player.x = GAME.player.w / 2;
+        const launcher = game.boss ?? game._spawnEnemy('E7', GAME.width / 2, 150);
+        launcher.burst = 2;
+        launcher.shotTimer = 10;
+      }
+      sync.update(GAME.step);
+      await threaded.update(GAME.step);
+      const missiles = threaded.enemyBullets.filter(bullet => bullet.active);
+      assert.equal(missiles.length, volleySize);
+      const trajectories = missiles.map(bullet => ({ vx: bullet.vx, vy: bullet.vy }));
+      for (const game of [sync, threaded]) game.player.x = GAME.width - GAME.player.w / 2;
+      for (let step = 0; step < 30; step++) {
+        sync.update(GAME.step);
+        await threaded.update(GAME.step);
+      }
+      for (const [index, bullet] of missiles.entries()) {
+        assert.equal(bullet.homing, false);
+        assert.equal(bullet.vx, trajectories[index].vx);
+        assert.equal(bullet.vy, trajectories[index].vy);
+      }
+      assert.deepEqual(combat(threaded), combat(sync));
+    }
   } finally {
     planner.dispose();
     await Promise.all(threads.map(thread => thread.termination));

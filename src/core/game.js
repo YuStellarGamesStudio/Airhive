@@ -435,7 +435,7 @@ export class Game {
           e.y = Math.min(e.y + MOTION.bomber.advance * speedFactor * dt, GAME.enemyAdvanceLimit);
           e.x = e.homeX + Math.sin(t * MOTION.bomber.frequency) * MOTION.bomber.wander;
           break;
-        case 'tracker':
+        case 'launcher':
         case 'jammer': {
           const setting = MOTION[e.behavior];
           e.y += (setting.hover - e.y) * dt;
@@ -525,17 +525,15 @@ export class Game {
       if (!bullet.active) continue;
       bullet.age += dt;
       if (bullet.delay > 0) { bullet.delay -= dt; continue; }
-      if (bullet.homing) {
-        const target = bullet.enemy ? this.player : this._nearestEnemy(bullet.x, bullet.y);
+      if (!bullet.enemy && bullet.homing) {
+        const target = this._nearestEnemy(bullet.x, bullet.y);
         if (target) {
           const angle = Math.atan2(target.y - bullet.y, target.x - bullet.x);
           const current = Math.atan2(bullet.vy, bullet.vx);
           const delta = Math.atan2(Math.sin(angle - current), Math.cos(angle - current));
-          const turn = clamp(delta, -(bullet.enemy ? GAME.missileTurn : GAME.player.homingTurn) * dt,
-            (bullet.enemy ? GAME.missileTurn : GAME.player.homingTurn) * dt);
-          const velocity = bullet.enemy ? GAME.missileSpeed : GAME.player.homingSpeed;
-          bullet.vx = Math.cos(current + turn) * velocity;
-          bullet.vy = Math.sin(current + turn) * velocity;
+          const turn = clamp(delta, -GAME.player.homingTurn * dt, GAME.player.homingTurn * dt);
+          bullet.vx = Math.cos(current + turn) * GAME.player.homingSpeed;
+          bullet.vy = Math.sin(current + turn) * GAME.player.homingSpeed;
         }
       }
       bullet.x += bullet.vx * dt;
