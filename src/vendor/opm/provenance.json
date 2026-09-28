@@ -1,0 +1,9 @@
+{
+  "name": "OPM.js",
+  "version": "1.1.0",
+  "release": "https://github.com/YueyuHoshizora/OPM.js/releases/tag/v1.1.0",
+  "archive": "https://github.com/YueyuHoshizora/OPM.js/releases/download/v1.1.0/opm.js-1.1.0.tgz",
+  "sha256": "1344a3c2e6e2904b32cd273854ededca318e9a25e97bca20bfc5d331a3b8121e",
+  "license": "Apache-2.0",
+  "contents": "Unmodified release dist/, LICENSE, package.json. Release archive does not contain NOTICE."
+}
