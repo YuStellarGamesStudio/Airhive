@@ -113,6 +113,17 @@ test('eight boss types rotate after wave 80 without starting obstacles', () => {
   }
 });
 
+test('population reduction rounds from the previous whole-aircraft counts and keeps boss waves', () => {
+  const game = makeGame();
+  for (const [wave, previous] of [[1, 18], [3, 20], [11, 29], [21, 41], [41, 63]]) {
+    game.startWave(wave);
+    assert.equal(game.spawnCount, Math.round(previous * 0.67), `wave ${wave}`);
+  }
+  game.startWave(10);
+  assert.equal(game.spawnCount, 0);
+  assert.equal(game.enemies.filter(enemy => enemy.active && enemy.boss).length, 1);
+});
+
 test('player and enemy projectile pools remain bounded during maximum firepower', () => {
   const game = makeGame();
   game.startWave(20);

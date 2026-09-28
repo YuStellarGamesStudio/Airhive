@@ -5,8 +5,9 @@ export const PLAN_STRIDE = 3;
 // Layout decisions stay in JS doubles; the GPU only evaluates per-slot geometry and selection.
 export function waveLayout(wave) {
   if (wave % GAME.wave.bossEvery === 0) return null;
-  const count = Math.min(GAME.enemyCap, Math.round(GAME.wave.density * Math.min(GAME.wave.countCap,
-    GAME.wave.baseCount + Math.floor((wave - 1) / GAME.wave.growthEvery))));
+  const population = Math.round(GAME.wave.density * Math.min(GAME.wave.countCap,
+    GAME.wave.baseCount + Math.floor((wave - 1) / GAME.wave.growthEvery)));
+  const count = Math.min(GAME.enemyCap, Math.round(population * GAME.wave.countScale));
   const profile = FORMATIONS[(wave - 1) % FORMATIONS.length];
   const columns = Math.round(profile.columns * GAME.wave.density);
   const spacing = Math.min(GAME.wave.columnSpacing,
