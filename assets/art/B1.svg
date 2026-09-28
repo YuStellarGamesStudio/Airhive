@@ -1,74 +1,91 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="240" height="140" viewBox="0 0 240 140">
 <defs>
-  <filter id="bevel" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+  <filter id="hull" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
     <feGaussianBlur in="SourceAlpha" stdDeviation="1.1" result="height"/>
-    <feDiffuseLighting in="height" surfaceScale="2.6" diffuseConstant="1.18" lighting-color="#fff" result="diffuse"><feDistantLight azimuth="225" elevation="52"/></feDiffuseLighting>
-    <feSpecularLighting in="height" surfaceScale="2.6" specularConstant=".75" specularExponent="18" lighting-color="#fff4df" result="specular"><feDistantLight azimuth="225" elevation="44"/></feSpecularLighting>
+    <feDiffuseLighting in="height" surfaceScale="2.4" diffuseConstant="1.22" lighting-color="#fff" result="diffuse"><feDistantLight azimuth="225" elevation="54"/></feDiffuseLighting>
+    <feSpecularLighting in="height" surfaceScale="2.4" specularConstant=".95" specularExponent="30" lighting-color="#f4f9ff" result="specular"><feDistantLight azimuth="225" elevation="40"/></feSpecularLighting>
+    <feSpecularLighting in="height" surfaceScale="2.4" specularConstant=".5" specularExponent="14" lighting-color="#7fc4ff" result="rim"><feDistantLight azimuth="30" elevation="24"/></feSpecularLighting>
     <feComposite in="SourceGraphic" in2="diffuse" operator="arithmetic" k1="1" result="lit"/>
-    <feComposite in="specular" in2="SourceAlpha" operator="in" result="gloss"/>
-    <feComposite in="gloss" in2="lit" operator="arithmetic" k2=".38" k3="1" result="shaded"/>
+    <feComposite in="specular" in2="rim" operator="arithmetic" k2="1" k3=".55" result="gloss0"/>
+    <feComposite in="gloss0" in2="SourceAlpha" operator="in" result="gloss"/>
+    <feComposite in="gloss" in2="lit" operator="arithmetic" k2=".42" k3="1" result="shaded"/>
     <feComposite in="shaded" in2="SourceAlpha" operator="in"/>
   </filter>
-  <filter id="grime" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-    <feTurbulence type="fractalNoise" baseFrequency=".07 .12" numOctaves="3" seed="31" result="mottle"/>
-    <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="5" result="grain"/>
-    <feComposite in="mottle" in2="grain" operator="arithmetic" k2=".7" k3=".3"/>
-    <feColorMatrix type="matrix" values="0 0 0 0 .1  0 0 0 0 .07  0 0 0 0 .05  -1.6 0 0 0 1.05"/>
+  <filter id="wear" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency=".07 .12" numOctaves="3" seed="41" result="mottle"/>
+    <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="2" seed="9" result="grain"/>
+    <feComposite in="mottle" in2="grain" operator="arithmetic" k2=".75" k3=".25"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 .06  0 0 0 0 .05  0 0 0 0 .05  -1.7 0 0 0 1.02"/>
     <feComposite in2="SourceAlpha" operator="in"/>
   </filter>
   <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
     <feGaussianBlur in="SourceAlpha" stdDeviation="2.2"/>
     <feOffset dx="2.5" dy="4.5" result="blur"/>
-    <feFlood flood-color="#02070d" flood-opacity=".5"/>
+    <feFlood flood-color="#01050b" flood-opacity=".5"/>
     <feComposite in2="blur" operator="in"/>
   </filter>
   <filter id="glow" x="-200%" y="-200%" width="500%" height="500%">
-    <feGaussianBlur stdDeviation="1.5" result="halo"/>
+    <feGaussianBlur stdDeviation="1.3" result="halo"/>
     <feMerge><feMergeNode in="halo"/><feMergeNode in="halo"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
-  <linearGradient id="wingL" x1="0" y1="0" x2=".75" y2="1"><stop stop-color="#838775"/><stop offset=".43" stop-color="#575d51"/><stop offset="1" stop-color="#343a35"/></linearGradient>
-  <linearGradient id="wingR" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#626759"/><stop offset=".55" stop-color="#454b42"/><stop offset="1" stop-color="#292e2b"/></linearGradient>
-  <linearGradient id="body" x1="0" x2="1"><stop stop-color="#353a34"/><stop offset=".28" stop-color="#858b78"/><stop offset=".42" stop-color="#a1a48d"/><stop offset=".68" stop-color="#575e52"/><stop offset="1" stop-color="#262c29"/></linearGradient>
-  <linearGradient id="bay" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#070c0d"/><stop offset=".42" stop-color="#1d2523"/><stop offset="1" stop-color="#8b4b2b"/></linearGradient>
-  <radialGradient id="nozzle"><stop stop-color="#15110d"/><stop offset=".7" stop-color="#494337"/><stop offset="1" stop-color="#191e20"/></radialGradient>
-  <g id="airframe"><path d="M120 8 145 14 159 31 190 29 226 20 235 29 232 84 213 90 189 83 168 102 145 104 120 133 95 104 72 102 51 83 27 90 8 84 5 29 14 20 50 29 81 31 95 14Z"/></g>
-  <g id="drone"><path d="M0 8 -3 1 -11 -4 -10 -7 -3 -5 -2 -12H2l1 7 7-2 1 3L3 1Z" fill="#595f51" stroke="#161b19" stroke-width=".8"/><path d="M-8 -5 -3 -4 M8 -5 3 -4" stroke="#a84829" stroke-width="1"/><circle cy="3" r="1.3" fill="#d26730"/></g>
+  <linearGradient id="wingL" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#77797a"/><stop offset=".42" stop-color="#52565b"/><stop offset="1" stop-color="#252a31"/></linearGradient>
+  <linearGradient id="wingR" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5a6064"/><stop offset=".5" stop-color="#393e44"/><stop offset="1" stop-color="#1c2129"/></linearGradient>
+  <linearGradient id="facetL" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#838687"/><stop offset="1" stop-color="#41484f"/></linearGradient>
+  <linearGradient id="facetR" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#454b52"/><stop offset="1" stop-color="#1a2027"/></linearGradient>
+  <linearGradient id="spine" x1="0" x2="1"><stop stop-color="#171a20"/><stop offset=".3" stop-color="#727277"/><stop offset=".54" stop-color="#34383e"/><stop offset="1" stop-color="#12161c"/></linearGradient>
+  <linearGradient id="film" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff8a5c"/><stop offset=".5" stop-color="#9b6bff"/><stop offset="1" stop-color="#3fd0d8"/></linearGradient>
+  <radialGradient id="eye" cx=".4" cy=".35" r=".7"><stop stop-color="#ffe3d6"/><stop offset=".2" stop-color="#ff5a3d"/><stop offset=".6" stop-color="#7a1410"/><stop offset="1" stop-color="#1e0605"/></radialGradient>
+  <g id="airframe"><path d="M120 135 97 109 72 103 51 94 33 100 7 88 5 31 16 24 43 32 85 24 98 29 99 15 112 8 128 8 141 15 142 29 155 24 197 32 224 24 235 31 233 88 207 100 189 94 168 103 143 109Z"/></g>
+  <g id="drone"><path d="M0 13-3 8-5 4-16-3-17-11-12-12-3-6-2-13H2l1 7 9-6 5 1-1 8L5 4 3 8Z" fill="#575d63" stroke="#11161b" stroke-width=".7"/><path d="M-16-10-12-10-3-5-4 1-14-4Z" fill="#81878a"/><path d="M16-10 12-10 3-5 4 1 14-4Z" fill="#30383f"/><path d="M0 12-2 5-2-11H2L2 5Z" fill="#181e25"/><path d="M-15-12v2 M15-12v2" stroke="#ff7a45" stroke-width="2"/><path d="M0 5 2.5 7v3L0 12l-2.5-2V7Z" fill="#11171d"/><path d="M0 7 1.4 8v2L0 11l-1.4-1V8Z" fill="#ff6749"/><path d="M-5 4-3 8 M5 4 3 8" stroke="#9da6a8" stroke-width=".5"/></g>
+  <g id="bay"><path d="M0 0 43-3 47 3 45 20 2 22Z" fill="#182027" stroke="#303740" stroke-width="1.2"/><path d="M2 4 40 2 42 16 4 18Z" fill="#080f14"/><path d="M4 4 40 2 40 5 5 7Z" fill="#69523e" opacity=".65"/><path d="M4 18 42 16v2L4 20Z" fill="#684932"/><path d="M7 5 10 5 11 17H8Z M34 3h3l2 12-3 1Z" fill="#303d42"/><path d="M11 17 34 15 M12 7 34 5" stroke="#bd8050" stroke-width=".6"/><path d="M5 9v5 M41 6v5" stroke="#e29750" stroke-width="1.5"/><path d="M1 3 42 0" stroke="#9ea6a6" stroke-width=".45" opacity=".5"/></g>
+  <pattern id="ram" width="10" height="8" patternUnits="userSpaceOnUse"><path d="M0 2 3 0h4l3 2v4L7 8H3L0 6 M5 0v8" fill="none" stroke="#090f16" stroke-width=".5" opacity=".65"/></pattern>
 </defs>
 <use href="#airframe" xlink:href="#airframe" filter="url(#shadow)"/>
-<!-- Massive broad wing deck, transverse launch deck and armored forward edge -->
-<g filter="url(#bevel)">
-  <path d="M96 30 50 29 14 20 5 29 8 84 27 90 51 83 75 103 105 94Z" fill="url(#wingL)"/>
-  <path d="M144 30 190 29 226 20 235 29 232 84 213 90 189 83 165 103 135 94Z" fill="url(#wingR)"/>
-</g>
-<path d="M13 28 48 37 78 38 91 46 89 88 74 94 47 74 19 78Z M227 28 192 37 162 38 149 46 151 88 166 94 193 74 221 78Z" fill="none" stroke="#161d1c" stroke-width="1.2" opacity=".8"/>
-<path d="M17 32 46 40 69 42 M223 32 194 40 171 42 M18 80 46 72 74 92 M222 80 194 72 166 92" fill="none" stroke="#bdc0a6" stroke-width=".75" opacity=".55"/>
-<path d="M8 49 30 52 38 74 14 73Z M232 49 210 52 202 74 226 73Z" fill="#373d37" stroke="#1d2421" stroke-width="1"/>
-<path d="M12 54 29 56 34 69 16 69 M228 54 211 56 206 69 224 69" fill="none" stroke="#a4a691" stroke-width=".6" opacity=".65"/>
-<!-- Recessed triple drone hangars and mechanical launch rails -->
-<g fill="url(#bay)" stroke="#161c1b" stroke-width="1.8">
- <path d="M28 44 83 48 83 58 29 55Z M28 60 83 62 83 72 31 72Z M37 76 84 76 86 86 47 84Z"/>
- <path d="M212 44 157 48 157 58 211 55Z M212 60 157 62 157 72 209 72Z M203 76 156 76 154 86 193 84Z"/>
-</g>
-<g fill="none" stroke="#b3a791" stroke-width=".65"><path d="M29 43 82 47 M29 59 82 61 M38 75 83 75 M211 43 158 47 M211 59 158 61 M202 75 157 75"/><path d="M32 54 79 56 M33 71 79 70 M48 83 80 84 M208 54 161 56 M207 71 161 70 M192 83 160 84" opacity=".48"/></g>
-<path d="M27 57 83 60 M29 74 83 74 M46 88 87 89 M213 57 157 60 M211 74 157 74 M194 88 153 89" fill="none" stroke="#2e3430" stroke-width="1.2"/>
-<use href="#drone" xlink:href="#drone" transform="translate(47 51) scale(.75)"/><use href="#drone" xlink:href="#drone" transform="translate(68 66) scale(.75)"/><use href="#drone" xlink:href="#drone" transform="translate(56 81) scale(.65)"/>
-<use href="#drone" xlink:href="#drone" transform="translate(193 51) scale(.75)"/><use href="#drone" xlink:href="#drone" transform="translate(172 66) scale(.75)"/><use href="#drone" xlink:href="#drone" transform="translate(184 81) scale(.65)"/>
-<!-- Three rear engine nozzles and bulkhead -->
-<path d="M91 30 95 16 105 12 108 32Z M132 32 135 12 145 16 149 30Z" fill="#4f544b" filter="url(#bevel)"/>
-<ellipse cx="101" cy="17" rx="7" ry="5" fill="url(#nozzle)"/><ellipse cx="120" cy="13" rx="9" ry="6" fill="url(#nozzle)"/><ellipse cx="139" cy="17" rx="7" ry="5" fill="url(#nozzle)"/>
-<path d="M97 18h8 M115 13h10 M135 18h8 M96 14l2 2 M104 13l-2 3 M113 9l3 3 M127 9l-3 3 M136 14l2 2 M144 14l-2 2" stroke="#9c9176" stroke-width=".8" opacity=".8"/>
-<!-- Forward command spine -->
-<path d="M120 22 137 28 151 58 147 91 138 111 120 133 102 111 93 91 89 58 103 28Z" fill="url(#body)" filter="url(#bevel)"/>
-<path d="M120 27 131 32 137 48 103 48 109 32Z" fill="#252b29" stroke="#aeb19d" stroke-width=".8"/>
-<path d="M120 31 128 36 132 45 108 45 112 36Z" fill="#354446"/><path d="M110 37 117 34 116 45 108 45Z" fill="#a5a995" opacity=".7"/>
-<path d="M94 55 146 55 M96 67 144 67 M97 88 143 88 M104 107 136 107 M120 49v66 M101 73l9 13 M139 73l-9 13" fill="none" stroke="#202721" stroke-width="1" opacity=".7"/>
-<path d="M96 56 144 56 M99 89 141 89 M106 108 134 108" stroke="#c4c2a8" stroke-width=".55" opacity=".58"/>
-<path d="M105 61h30v5h-30Z M107 92h26v8h-26Z" fill="#414943" stroke="#1d2421" stroke-width=".8"/>
-<path d="M108 63h24 M109 95h22" stroke="#aeb09b" stroke-width=".65" opacity=".65"/>
-<!-- Forward-pointing horizontal gun battery -->
-<g fill="#363c38" stroke="#1d2421" stroke-width=".8"><path d="M17 90h36l6 7-7 5H20Z M223 90h-36l-6 7 7 5h32Z"/><path d="M31 94h7v21h-7Z M45 94h6v18h-6Z M209 94h-7v21h7Z M195 94h-6v18h6Z"/></g>
-<path d="M33 97v16 M47 96v14 M207 97v16 M193 96v14" stroke="#a6ac9a" stroke-width=".8"/><path d="M31 115h7 M45 112h6 M202 115h7 M189 112h6" stroke="#101718" stroke-width="2"/>
-<path d="M73 34h17l-6 7-12-3Z M167 34h-17l6 7 12-3Z M52 96l13 1 8 6-17-2Z M188 96l-13 1-8 6 17-2Z" fill="#ad4428" opacity=".85"/>
-<path d="M18 38h9 M213 38h9" stroke="#e69252" stroke-width="1.1"/><path d="M120 119v8" stroke="#222820" stroke-width="2"/><circle cx="120" cy="126" r="1.5" fill="#ee8d40" filter="url(#glow)"/>
-<use href="#airframe" xlink:href="#airframe" filter="url(#grime)" opacity=".5"/>
+<!-- Broad, stepped launch-deck wings and thick armored chine. -->
+<g filter="url(#hull)"><path d="M101 34 85 24 43 32 16 24 5 31 7 88 33 100 51 94 72 103 100 98 111 69Z" fill="url(#wingL)"/><path d="M139 34 155 24 197 32 224 24 235 31 233 88 207 100 189 94 168 103 140 98 129 69Z" fill="url(#wingR)"/></g>
+<path d="M9 35 20 31 44 39 79 36 101 48 92 74 71 92 49 83 34 90 12 80Z" fill="url(#facetL)" opacity=".65"/><path d="M231 35 220 31 196 39 161 36 139 48 148 74 169 92 191 83 206 90 228 80Z" fill="url(#facetR)" opacity=".8"/>
+<path d="M9 35 20 31 44 39 79 36 101 48 92 74 71 92 49 83 34 90 12 80Z M231 35 220 31 196 39 161 36 139 48 148 74 169 92 191 83 206 90 228 80Z" fill="url(#film)" opacity=".1"/>
+<path d="M7 32 16 27 43 35 84 27 96 34 M233 32 224 27 197 35 156 27 144 34 M8 85l24 10 18-6 22 9 M232 85l-24 10-18-6-22 9" fill="none" stroke="#181d23" stroke-width="2.4"/>
+<path d="M10 34 19 30 44 38 81 31 M230 34 221 30 196 38 159 31 M10 81l23 9 M230 81l-23 9" fill="none" stroke="#8a9291" stroke-width=".55" opacity=".45"/>
+<!-- Cast armor sections, ceramic RAM tiles, dorsal heat sinks and launch-control electronics. -->
+<path d="M11 36 20 32 39 39 36 42 14 40Z M228 36l-8-4-19 7 3 3 22-2Z M12 77l21 8 5-3-25-10Z M228 77l-21 8-5-3 25-10Z" fill="#242b32" stroke="#151b23" stroke-width=".8"/>
+<path d="M16 40 34 43 36 49 16 46Z M224 40l-18 3-2 6 20-3Z M13 79l20 7-1 3-19-6Z M227 79l-20 7 1 3 19-6Z" fill="#647078" opacity=".4"/>
+<path d="M68 38 87 35 91 43 73 45Z M172 38l-19-3-4 8 18 2Z M76 91l15-6-1 9-11 4Z M164 91l-15-6 1 9 11 4Z" fill="#202a30" stroke="#151b20" stroke-width=".7"/>
+<path d="M13 40 23 43 27 57 12 54Z M227 40l-10 3-4 14 15-3Z M72 37 87 35 91 43 73 45Z M168 37l-15-2-4 8 18 2Z" fill="url(#ram)" opacity=".2"/>
+<path d="M78 38h9 M153 38h9 M82 91l7-3 M158 91l-7-3" stroke="#a5ada9" stroke-width=".45" opacity=".5"/>
+<path d="M83 47h8v2h-8Z M83 51h8v2h-8Z M83 55h8v2h-8Z M149 47h8v2h-8Z M149 51h8v2h-8Z M149 55h8v2h-8Z" fill="#151c22" stroke="#616967" stroke-width=".4"/>
+<path d="M9 60h5v2H9Z M9 66h5v2H9Z M226 60h5v2h-5Z M226 66h5v2h-5Z" fill="#252e34"/><path d="M11 59v11 M229 59v11" stroke="#915c39" stroke-width=".65"/>
+<!-- Three deep lateral launch bays on either side: the occupants share E1's swept wings, warm tip pods, and hexagonal eye. -->
+<use href="#bay" xlink:href="#bay" transform="translate(24 43)"/><use href="#bay" xlink:href="#bay" transform="translate(21 65)"/><use href="#bay" xlink:href="#bay" transform="translate(41 87) scale(.8)"/>
+<use href="#bay" xlink:href="#bay" transform="translate(216 43) scale(-1 1)"/><use href="#bay" xlink:href="#bay" transform="translate(219 65) scale(-1 1)"/><use href="#bay" xlink:href="#bay" transform="translate(199 87) scale(-.8 .8)"/>
+<use href="#drone" xlink:href="#drone" transform="translate(46 54) scale(.82)"/><use href="#drone" xlink:href="#drone" transform="translate(46 76) scale(.82)"/><use href="#drone" xlink:href="#drone" transform="translate(57 96) scale(.58)"/>
+<use href="#drone" xlink:href="#drone" transform="translate(194 54) scale(.82)"/><use href="#drone" xlink:href="#drone" transform="translate(194 76) scale(.82)"/><use href="#drone" xlink:href="#drone" transform="translate(183 96) scale(.58)"/>
+<path d="M17 48 12 45v30l5 5 6-2-2-27Z M223 48l5-3v30l-5 5-6-2 2-27Z" fill="#272e35" stroke="#767a79" stroke-width=".8"/><path d="M13 48v26 M227 48v26" stroke="#b4b7af" stroke-width=".7" opacity=".7"/>
+<path d="M20 46v9 M20 68v9 M35 91v7 M220 46v9 M220 68v9 M205 91v7" stroke="#a7663e" stroke-width="1.3" opacity=".75"/>
+<path d="M23 40 29 39v2l-6 1Z M217 40l-6-1v2l6 1Z M25 61l7-1v2l-7 1Z M215 61l-7-1v2l7 1Z" fill="#282e33" stroke="#797e79" stroke-width=".45"/>
+<!-- Upward thrust in armored, segmented ion slots. -->
+<g filter="url(#hull)"><path d="M98 30 99 15 112 8h16l13 7 1 15-12 11h-20Z" fill="url(#spine)"/></g>
+<path d="M101 13h15v8h-15Z M124 13h15v8h-15Z M110 7h20v8h-20Z" fill="#10161b" stroke="#8e9698" stroke-width="1"/>
+<path d="M104 14v6 M108 14v6 M112 14v6 M128 14v6 M132 14v6 M136 14v6 M114 9v5 M119 9v5 M124 9v5" stroke="#20292c" stroke-width="1"/>
+<g filter="url(#glow)" fill="#ff7a45"><path d="M102 12h13v2h-13Z M125 12h13v2h-13Z M112 6h16v2h-16Z"/></g><path d="M104 12.7h9 M127 12.7h9 M114 6.7h12" stroke="#fff0dc" stroke-width=".8"/>
+<!-- Raised command citadel, segmented armor and forward hexagonal targeting array. -->
+<path d="M120 25 140 32 151 58 148 91 139 111 120 135 101 111 92 91 89 58 100 32Z" fill="url(#spine)" filter="url(#hull)"/>
+<path d="M120 27 136 34 141 54 132 68 120 65 108 68 99 54 104 34Z" fill="url(#facetL)"/><path d="M120 27 136 34 141 54 132 68 120 65Z" fill="url(#facetR)" opacity=".75"/>
+<path d="M120 28 136 34 141 54 132 68 120 65 108 68 99 54 104 34Z" fill="url(#film)" opacity=".08"/>
+<path d="M120 33 131 37 136 48H104l5-11Z" fill="#0d1820" stroke="#a0adb0" stroke-width="1"/><path d="M106 43 113 37h5l-2 10h-11Z" fill="#adc4c1" opacity=".42"/>
+<path d="M101 68 120 72 139 68 144 84 135 99 120 105 105 99 96 84Z" fill="#343a40" stroke="#161c23" stroke-width="1"/><path d="M101 68 120 72 120 104 105 99 96 84Z" fill="#60676c" opacity=".55"/><path d="M102 73 118 76 118 86 101 81Z M122 76l16-3 1 8-17 5Z" fill="#262d35" stroke="#151b22" stroke-width=".7"/><path d="M102 74 117 77 M123 77l14-3" stroke="#979e9c" stroke-width=".45" opacity=".55"/>
+<path d="M102 72h36 M99 85l21 6 21-6 M106 99l14 5 14-5 M120 56v73" stroke="#0e151c" stroke-width="1.3" fill="none"/><path d="M103 73h34 M107 100l13 5" stroke="#b4b9b7" stroke-width=".7" fill="none" opacity=".6"/>
+<path d="M120 110 127 114v9l-7 5-7-5v-9Z" fill="#0c141b" stroke="#959b9c" stroke-width="1"/><path d="M120 112 125 115v7l-5 4-5-4v-7Z" fill="url(#eye)"/><path d="M116 116q2-2 4-2" fill="none" stroke="#ffe4cf" stroke-width=".9"/>
+<path d="M111 56h18v3h-18Z M107 93l13 3 13-3-3 5-10 2-10-2Z" fill="#202a30"/><path d="M110 58h20 M107 94l13 3 13-3" stroke="#a1a19a" stroke-width=".5" opacity=".55"/>
+<path d="M112 61h2v5h-2Z M117 61h2v5h-2Z M122 61h2v5h-2Z M127 61h2v5h-2Z" fill="#101b22"/><path d="M111 59 116 59 M125 59h5" stroke="#ad6845" stroke-width=".7"/>
+<!-- Two transverse gun batteries with shielded rangefinder lenses. -->
+<path d="M68 104h27l7 7-4 7H66l-7-6Z M172 104h-27l-7 7 4 7h32l7-6Z" fill="#252a31" stroke="#858d91" stroke-width=".8"/>
+<path d="M68 108h27 M172 108h-27" stroke="#adb0aa" stroke-width=".7"/>
+<path d="M70 116v17h5v-17 M82 117v14h5v-14 M170 116v17h-5v-17 M158 117v14h-5v-14" fill="#39434a" stroke="#151b22" stroke-width="1"/>
+<path d="M70 132h5 M82 130h5 M165 132h5 M153 130h5" stroke="#0d1319" stroke-width="2"/><path d="M72 119v11 M84 119v9 M168 119v11 M156 119v9" stroke="#abb6b7" stroke-width=".6"/>
+<path d="M75 31 83 33 78 38 69 37Z M165 31l-8 2 5 5 9-1Z" fill="#5c1e1b"/><path d="M73 34l5 1 M167 34l-5 1" stroke="#ff8a5c" stroke-width="1.2" filter="url(#glow)"/>
+<path d="M120 75 124 77v5l-4 3-4-3v-5Z" fill="#421d1d"/><path d="M120 77 122 78v3l-2 2-2-2v-3Z" fill="#f35d46"/>
+<path d="M68 114h25 M147 114h25" stroke="#121921" stroke-width="1.1"/><path d="M70 122h5 M82 123h5 M165 122h5 M153 123h5" stroke="#705443" stroke-width=".7" opacity=".7"/>
+<path d="M99 18h5 M136 18h5 M100 24h6 M134 24h6" stroke="#14161a" stroke-width="1.8" opacity=".5"/>
+<use href="#airframe" xlink:href="#airframe" filter="url(#wear)" opacity=".3"/>
 </svg>

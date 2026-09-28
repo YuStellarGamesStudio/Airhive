@@ -1,93 +1,130 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="100" viewBox="0 0 120 100">
 <defs>
-  <filter id="bevel" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+  <!-- Realistic-future kit (hostile): satin obsidian ceramic, key light upper-left (azimuth 225°), cool rim. -->
+  <filter id="hull" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
     <feGaussianBlur in="SourceAlpha" stdDeviation="1.1" result="height"/>
-    <feDiffuseLighting in="height" surfaceScale="2.6" diffuseConstant="1.18" lighting-color="#fff" result="diffuse"><feDistantLight azimuth="225" elevation="52"/></feDiffuseLighting>
-    <feSpecularLighting in="height" surfaceScale="2.6" specularConstant=".75" specularExponent="18" lighting-color="#fff4df" result="specular"><feDistantLight azimuth="225" elevation="44"/></feSpecularLighting>
+    <feDiffuseLighting in="height" surfaceScale="2.4" diffuseConstant="1.22" lighting-color="#fff" result="diffuse"><feDistantLight azimuth="225" elevation="54"/></feDiffuseLighting>
+    <feSpecularLighting in="height" surfaceScale="2.4" specularConstant=".95" specularExponent="30" lighting-color="#f4f9ff" result="specular"><feDistantLight azimuth="225" elevation="40"/></feSpecularLighting>
+    <feSpecularLighting in="height" surfaceScale="2.4" specularConstant=".5" specularExponent="14" lighting-color="#7fc4ff" result="rim"><feDistantLight azimuth="30" elevation="24"/></feSpecularLighting>
     <feComposite in="SourceGraphic" in2="diffuse" operator="arithmetic" k1="1" result="lit"/>
-    <feComposite in="specular" in2="SourceAlpha" operator="in" result="gloss"/>
-    <feComposite in="gloss" in2="lit" operator="arithmetic" k2=".38" k3="1" result="shaded"/>
+    <feComposite in="specular" in2="rim" operator="arithmetic" k2="1" k3=".55" result="gloss0"/>
+    <feComposite in="gloss0" in2="SourceAlpha" operator="in" result="gloss"/>
+    <feComposite in="gloss" in2="lit" operator="arithmetic" k2=".42" k3="1" result="shaded"/>
     <feComposite in="shaded" in2="SourceAlpha" operator="in"/>
   </filter>
-  <filter id="grime" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-    <feTurbulence type="fractalNoise" baseFrequency=".07 .12" numOctaves="3" seed="11" result="mottle"/>
-    <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="5" result="grain"/>
-    <feComposite in="mottle" in2="grain" operator="arithmetic" k2=".7" k3=".3"/>
-    <feColorMatrix type="matrix" values="0 0 0 0 .1  0 0 0 0 .07  0 0 0 0 .05  -1.6 0 0 0 1.05"/>
+  <filter id="wear" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency=".07 .12" numOctaves="3" seed="23" result="mottle"/>
+    <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="2" seed="9" result="grain"/>
+    <feComposite in="mottle" in2="grain" operator="arithmetic" k2=".75" k3=".25"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 .06  0 0 0 0 .05  0 0 0 0 .05  -1.7 0 0 0 1.02"/>
     <feComposite in2="SourceAlpha" operator="in"/>
   </filter>
   <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
     <feGaussianBlur in="SourceAlpha" stdDeviation="2.2"/>
     <feOffset dx="2.5" dy="4.5" result="blur"/>
-    <feFlood flood-color="#02070d" flood-opacity=".5"/>
+    <feFlood flood-color="#01050b" flood-opacity=".5"/>
     <feComposite in2="blur" operator="in"/>
   </filter>
   <filter id="glow" x="-200%" y="-200%" width="500%" height="500%">
-    <feGaussianBlur stdDeviation="1.5" result="halo"/>
+    <feGaussianBlur stdDeviation="1.3" result="halo"/>
     <feMerge><feMergeNode in="halo"/><feMergeNode in="halo"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
+  <!-- Obsidian ceramic with warm gunmetal undertone -->
   <linearGradient id="wingL" x1="1" y1="1" x2="0" y2="0">
-    <stop offset="0" stop-color="#6d7266"/><stop offset=".6" stop-color="#5a5f55"/><stop offset="1" stop-color="#4b5048"/>
+    <stop offset="0" stop-color="#6c6f74"/><stop offset=".55" stop-color="#55585e"/><stop offset="1" stop-color="#43464c"/>
   </linearGradient>
   <linearGradient id="wingR" x1="0" y1="1" x2="1" y2="0">
-    <stop offset="0" stop-color="#595e54"/><stop offset=".6" stop-color="#4a4f46"/><stop offset="1" stop-color="#3c4039"/>
+    <stop offset="0" stop-color="#53565c"/><stop offset=".55" stop-color="#42454b"/><stop offset="1" stop-color="#33363b"/>
   </linearGradient>
-  <linearGradient id="body" x1="0" x2="1">
-    <stop offset="0" stop-color="#40443d"/><stop offset=".22" stop-color="#7c8174"/><stop offset=".4" stop-color="#959a8b"/><stop offset=".65" stop-color="#5c6157"/><stop offset="1" stop-color="#2f332e"/>
+  <linearGradient id="facetL" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#6e7277"/><stop offset="1" stop-color="#8b8f94"/>
   </linearGradient>
-  <radialGradient id="sensor" cx=".4" cy=".35" r=".7">
-    <stop offset="0" stop-color="#ffd9c8"/><stop offset=".18" stop-color="#e2493a"/><stop offset=".55" stop-color="#6e1414"/><stop offset="1" stop-color="#1c0707"/>
-  </radialGradient>
-  <radialGradient id="nozzle" cx=".5" cy=".6" r=".6">
-    <stop offset="0" stop-color="#140f0d"/><stop offset=".6" stop-color="#3a2c25"/><stop offset=".85" stop-color="#78624f"/><stop offset="1" stop-color="#2a2d31"/>
+  <linearGradient id="facetR" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#46494e"/><stop offset="1" stop-color="#2d3034"/>
+  </linearGradient>
+  <linearGradient id="pod" x1="0" x2="1">
+    <stop offset="0" stop-color="#2c2f33"/><stop offset=".3" stop-color="#7a7e84"/><stop offset=".55" stop-color="#55595e"/><stop offset="1" stop-color="#25282c"/>
+  </linearGradient>
+  <linearGradient id="spine" x1="0" x2="1">
+    <stop offset="0" stop-color="#101114"/><stop offset=".32" stop-color="#3d4148"/><stop offset=".5" stop-color="#23262b"/><stop offset="1" stop-color="#0b0c0e"/>
+  </linearGradient>
+  <linearGradient id="film" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#ff8a5c"/><stop offset=".5" stop-color="#9b6bff"/><stop offset="1" stop-color="#3fd0d8"/>
+  </linearGradient>
+  <radialGradient id="eye" cx=".4" cy=".35" r=".7">
+    <stop offset="0" stop-color="#ffe3d6"/><stop offset=".2" stop-color="#ff5a3d"/><stop offset=".6" stop-color="#7a1410"/><stop offset="1" stop-color="#1e0605"/>
   </radialGradient>
   <g id="airframe">
-    <path d="M60 94 50 60 8 40 10 32 50 36 54 12h12l4 24 40-4 2 8-42 20Z"/>
+    <path d="M60 95 51 72 52 64 10 38 6 18H14.4L22 26 49 33 53 10H67L71 33 98 26 105.6 18H114L110 38 68 64 69 72Z"/>
   </g>
 </defs>
 
 <use href="#airframe" xlink:href="#airframe" filter="url(#shadow)"/>
 
-<!-- Cranked delta wing, nose toward the player (down) -->
-<g filter="url(#bevel)">
-  <path d="M52 38 10 32 8 40 50 60Z" fill="url(#wingL)"/>
-  <path d="M68 38 110 32 112 40 70 60Z" fill="url(#wingR)"/>
+<!-- Faceted swept wings, nose toward the player (down) -->
+<g filter="url(#hull)">
+  <path d="M52 64 10 38 9 28 22 26 49 33Z" fill="url(#wingL)"/>
+  <path d="M68 64 110 38 111 28 98 26 71 33Z" fill="url(#wingR)"/>
 </g>
-<g fill="none">
-  <path d="M10.5 39.5 50 58.5 M109.5 39.5 70 58.5" stroke="#c9ccbe" stroke-width=".6" opacity=".45"/>
-  <path d="M12 33.5 51 38.5 M108 33.5 69 38.5 M24 36 25.5 46 M96 36 94.5 46 M38 37.5 38.5 52 M82 37.5 81.5 52" stroke="#1d201b" stroke-width=".55" opacity=".55"/>
-</g>
-<!-- Wingtip strakes and hostile markings -->
-<path d="M8 40 6 33 10 32Z M112 40 114 33 110 32Z" fill="#33372f"/>
-<path d="M20 36.4 30 37.7 31 42.4 21.4 40.6Z M100 36.4 90 37.7 89 42.4 98.6 40.6Z" fill="#8f2a22" opacity=".85"/>
-<path d="M21 37.6 29.2 38.6 M99 37.6 90.8 38.6" stroke="#d4574a" stroke-width=".4" opacity=".6"/>
-
-<!-- Fuselage pod -->
-<path d="M60 94C56 86 51.5 70 50.5 56L50 36 54 12h12l4 24-.5 20C68.5 70 64 86 60 94Z" fill="url(#body)" filter="url(#bevel)"/>
+<path d="M52 64 10 38 9 28 22 26 49 33Z M68 64 110 38 111 28 98 26 71 33Z" fill="url(#film)" opacity=".1"/>
+<!-- Dark ceramic leading-edge tiles and emissive seam -->
+<path d="M52 64 10 38 10.3 35.6 51 60.6Z M68 64 110 38 109.7 35.6 69 60.6Z" fill="#1c1e22"/>
 <g fill="none" stroke-linecap="round">
-  <path d="M51.4 44h17.2 M51.2 56h17.6 M53 70h14 M60 20v18" stroke="#1d201b" stroke-width=".55" opacity=".6"/>
-  <path d="M55 22h10v12H55Z" stroke="#1d201b" stroke-width=".5" opacity=".6"/>
-  <path d="M52.3 40 52.6 66" stroke="#d6d9cc" stroke-width=".45" opacity=".5"/>
+  <path d="M12 33 50 55 M108 33 70 55 M24 28 26 42 M96 28 94 42 M37 30 38 50 M83 30 82 50" stroke="#16181b" stroke-width=".55" opacity=".6"/>
+  <path d="M12.4 32 50.4 54 M107.6 32 69.6 54" stroke="#c8ccd2" stroke-width=".35" opacity=".4"/>
+  <path d="M23 26.6 48.6 33.6 M97 26.6 71.4 33.6" stroke="#16181b" stroke-width=".5" opacity=".6"/>
 </g>
-<g fill="#1b1e19" opacity=".7">
-  <circle cx="53" cy="47" r=".45"/><circle cx="67" cy="47" r=".45"/><circle cx="53" cy="53" r=".45"/><circle cx="67" cy="53" r=".45"/><circle cx="56" cy="63" r=".45"/><circle cx="64" cy="63" r=".45"/>
+<!-- Graphite control surfaces -->
+<path d="M22 26 49 33 48.6 36.4 23.6 29.6Z M98 26 71 33 71.4 36.4 96.4 29.6Z" fill="#26292d" opacity=".9"/>
+<!-- Hive faction glyph -->
+<g opacity=".9">
+  <path d="M28 35.6 32 33.3 36 35.6V40.2L32 42.5 28 40.2Z M84 35.6 88 33.3 92 35.6V40.2L88 42.5 84 40.2Z" fill="#6e1a15"/>
+  <path d="M32 35.2 34.4 39.4H29.6Z M88 35.2 90.4 39.4H85.6Z" fill="#e0493a"/>
 </g>
-<!-- Dorsal intake and single exhaust facing away from the player -->
-<path d="M55.2 27.5h9.6l-1 8h-7.6Z" fill="#15171a"/>
-<path d="M55.4 27.9h9.2" stroke="#b9bcb0" stroke-width=".6"/>
-<path d="M53.6 12h12.8l-.8-4.8h-11.2Z" fill="#4a4540"/>
-<ellipse cx="60" cy="7.4" rx="5.6" ry="1.9" fill="url(#nozzle)"/>
-<path d="M56 12v-4.6 M58.7 12v-4.8 M61.3 12v-4.8 M64 12v-4.6" stroke="#1d1f22" stroke-width=".4" opacity=".7"/>
 
-<!-- Optical sensor ball in the nose -->
-<ellipse cx="60" cy="81" rx="4.4" ry="5.6" fill="#141619"/>
-<ellipse cx="60" cy="81.2" rx="3.3" ry="4.4" fill="url(#sensor)"/>
-<path d="M58.4 78.2q1-1.4 2.6-1.2" stroke="#fff1e6" stroke-width=".6" fill="none" opacity=".85"/>
+<!-- Wingtip ion thruster pods (thrust toward the top) -->
+<g filter="url(#hull)">
+  <path d="M6.2 20H14.2L14.8 36 12.6 40H8.2L6 36Z" fill="url(#pod)"/>
+  <path d="M105.8 20H113.8L114 36 111.8 40H107.4L105.2 36Z" fill="url(#pod)"/>
+</g>
+<path d="M6.2 20H14.2V23H6.2Z M105.8 20H113.8V23H105.8Z" fill="#1a1c1f"/>
+<path d="M8.6 20V23 M11.8 20V23 M108.2 20V23 M111.4 20V23" stroke="#0c0d0f" stroke-width=".4"/>
+<g filter="url(#glow)">
+  <rect x="7" y="18" width="6.4" height="1.6" rx=".8" fill="#ff7a45"/>
+  <rect x="106.6" y="18" width="6.4" height="1.6" rx=".8" fill="#ff7a45"/>
+</g>
 
-<!-- Red anti-collision warning beacon -->
-<circle cx="60" cy="48" r="2.2" fill="#2a1512"/>
-<circle cx="60" cy="48" r="1.35" fill="#ff4a38" filter="url(#glow)"/>
-<circle cx="59.6" cy="47.6" r=".45" fill="#fff0e0"/>
+<!-- Faceted fuselage pod -->
+<g filter="url(#hull)">
+  <path d="M60 95 51 72 49 40 53 10H60Z" fill="url(#facetL)"/>
+  <path d="M60 95 69 72 71 40 67 10H60Z" fill="url(#facetR)"/>
+</g>
+<g fill="none" stroke-linecap="round">
+  <path d="M60 12V90" stroke="#d8dbe0" stroke-width=".5" opacity=".55"/>
+  <path d="M51.2 42h17.6 M51.4 58h17.2 M53 72h14" stroke="#16181b" stroke-width=".55" opacity=".6"/>
+</g>
+<!-- Armored obsidian spine with emissive seams -->
+<path d="M60 88 54.2 70 53.2 44 56 14H64L66.8 44 65.8 70Z" fill="url(#spine)"/>
+<path d="M60 16V86" stroke="#6e737a" stroke-width=".4" opacity=".7"/>
+<path d="M54.8 46h10.4 M54.6 62h10.8" stroke="#08090b" stroke-width=".5"/>
+<path d="M55.4 20 54.2 44 55 68 59.4 84 M64.6 20 65.8 44 65 68 60.6 84" fill="none" stroke="#ff4a36" stroke-width=".5" filter="url(#glow)" opacity=".85"/>
+<!-- Pulse cannon barrels at the wing roots -->
+<path d="M49.6 64h2.2v12h-2.2Z M68.2 64h2.2v12h-2.2Z" fill="#202327"/>
+<path d="M50.1 64.4v11 M68.7 64.4v11" stroke="#9aa0a7" stroke-width=".4" opacity=".7"/>
+<circle cx="50.7" cy="76.2" r=".7" fill="#ff8a5c" filter="url(#glow)"/>
+<circle cx="69.3" cy="76.2" r=".7" fill="#ff8a5c" filter="url(#glow)"/>
 
-<use href="#airframe" xlink:href="#airframe" filter="url(#grime)" opacity=".5"/>
+<!-- Main ion exhaust facing away from the player -->
+<path d="M53 10H67L66 5H54Z" fill="#26292d"/>
+<path d="M55.5 10V5.3 M58.3 10V5.2 M61.7 10V5.2 M64.5 10V5.3" stroke="#0e0f11" stroke-width=".4" opacity=".8"/>
+<rect x="54.6" y="4" width="10.8" height="1.8" rx=".9" fill="#ff7a45" filter="url(#glow)"/>
+<path d="M56 4.9h8" stroke="#fff0e0" stroke-width=".55"/>
+
+<!-- Hexagonal optical sensor in the nose -->
+<path d="M60 74.4 64.4 77V83.2L60 85.8 55.6 83.2V77Z" fill="#141518"/>
+<path d="M60 76 63 77.8V82.4L60 84.2 57 82.4V77.8Z" fill="url(#eye)" filter="url(#glow)"/>
+<path d="M58.3 78.2q.9-1 2.1-.9" stroke="#fff1e6" stroke-width=".55" fill="none" opacity=".85"/>
+<path d="M57.4 88 62.6 88 M58.4 90.6 61.6 90.6" stroke="#ff5a3d" stroke-width=".5" opacity=".7"/>
+
+<use href="#airframe" xlink:href="#airframe" filter="url(#wear)" opacity=".3"/>
 </svg>

@@ -5,14 +5,14 @@
 }
 :root {
   color-scheme:dark;
-  --bg:#09111a;
-  --panel:#101c28;
-  --line:#293540;
-  --ink:#e9eee9;
-  --muted:#83949f;
-  --accent:#e9b56b;
-  --green:#8bcbb4;
-  --danger:#f08070;
+  --bg:#070e16;
+  --panel:#0d1924;
+  --line:#243643;
+  --ink:#e8f1f3;
+  --muted:#7d93a1;
+  --accent:#7ddcee;
+  --green:#8fe0c6;
+  --danger:#ff806c;
   font-family:AirhiveSystem,"Segoe UI",sans-serif;
   font-synthesis:none;
   background:var(--bg);
@@ -28,7 +28,7 @@ html,body {
   overflow:hidden
 }
 body {
-  background:radial-gradient(ellipse at 50% 35%,#182635 0,#0b141e 55%,#080f16 100%)
+  background:radial-gradient(ellipse at 50% 35%,#132435 0,#09121c 55%,#060c13 100%)
 }
 button,input,select,textarea {
   font:inherit
@@ -175,7 +175,7 @@ a:hover {
   height:5px;
   border-radius:50%;
   background:var(--green);
-  box-shadow:0 0 8px #8bcbb435
+  box-shadow:0 0 8px #8fe0c640
 }
 .strip-center {
   opacity:.6
@@ -272,7 +272,7 @@ h1 em {
 }
 .primary:hover:not(:disabled) {
   color:#111a23;
-  background:#f5c986
+  background:#aaeaf6
 }
 .primary>span:last-child:not(:first-child) {
   font-size:22px;
@@ -802,7 +802,7 @@ footer>span {
   letter-spacing:2px;
   background:#0c182adb;
   padding:10px 18px;
-  border:1px solid #e9b56b55;
+  border:1px solid #7ddcee55;
   pointer-events:none
 }
 .audio-panel {
@@ -961,8 +961,8 @@ textarea {
   transform:translateX(-50%);
   max-width:calc(100vw - 24px);
   padding:12px 20px;
-  border:1px solid #786346;
-  background:#25303df5;
+  border:1px solid #3d6a78;
+  background:#162634f5;
   color:var(--accent);
   font-size:12px;
   z-index:30;

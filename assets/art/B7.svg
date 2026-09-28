@@ -1,76 +1,91 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="240" height="140" viewBox="0 0 240 140">
 <defs>
-  <filter id="bevel" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+  <filter id="hull" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
     <feGaussianBlur in="SourceAlpha" stdDeviation="1.1" result="height"/>
-    <feDiffuseLighting in="height" surfaceScale="2.6" diffuseConstant="1.18" lighting-color="#fff" result="diffuse"><feDistantLight azimuth="225" elevation="52"/></feDiffuseLighting>
-    <feSpecularLighting in="height" surfaceScale="2.6" specularConstant=".75" specularExponent="18" lighting-color="#fff4df" result="specular"><feDistantLight azimuth="225" elevation="44"/></feSpecularLighting>
+    <feDiffuseLighting in="height" surfaceScale="2.4" diffuseConstant="1.22" lighting-color="#fff" result="diffuse"><feDistantLight azimuth="225" elevation="54"/></feDiffuseLighting>
+    <feSpecularLighting in="height" surfaceScale="2.4" specularConstant=".95" specularExponent="30" lighting-color="#f4f9ff" result="specular"><feDistantLight azimuth="225" elevation="40"/></feSpecularLighting>
+    <feSpecularLighting in="height" surfaceScale="2.4" specularConstant=".5" specularExponent="14" lighting-color="#7fc4ff" result="rim"><feDistantLight azimuth="30" elevation="24"/></feSpecularLighting>
     <feComposite in="SourceGraphic" in2="diffuse" operator="arithmetic" k1="1" result="lit"/>
-    <feComposite in="specular" in2="SourceAlpha" operator="in" result="gloss"/>
-    <feComposite in="gloss" in2="lit" operator="arithmetic" k2=".38" k3="1" result="shaded"/>
+    <feComposite in="specular" in2="rim" operator="arithmetic" k2="1" k3=".55" result="gloss0"/>
+    <feComposite in="gloss0" in2="SourceAlpha" operator="in" result="gloss"/>
+    <feComposite in="gloss" in2="lit" operator="arithmetic" k2=".42" k3="1" result="shaded"/>
     <feComposite in="shaded" in2="SourceAlpha" operator="in"/>
   </filter>
-  <filter id="grime" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+  <filter id="wear" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
     <feTurbulence type="fractalNoise" baseFrequency=".07 .12" numOctaves="3" seed="47" result="mottle"/>
-    <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="5" result="grain"/>
-    <feComposite in="mottle" in2="grain" operator="arithmetic" k2=".7" k3=".3"/>
-    <feColorMatrix type="matrix" values="0 0 0 0 .1  0 0 0 0 .07  0 0 0 0 .05  -1.6 0 0 0 1.05"/>
+    <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="2" seed="9" result="grain"/>
+    <feComposite in="mottle" in2="grain" operator="arithmetic" k2=".75" k3=".25"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 .06  0 0 0 0 .05  0 0 0 0 .05  -1.7 0 0 0 1.02"/>
     <feComposite in2="SourceAlpha" operator="in"/>
   </filter>
   <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
     <feGaussianBlur in="SourceAlpha" stdDeviation="2.2"/>
     <feOffset dx="2.5" dy="4.5" result="blur"/>
-    <feFlood flood-color="#02070d" flood-opacity=".5"/>
+    <feFlood flood-color="#01050b" flood-opacity=".5"/>
     <feComposite in2="blur" operator="in"/>
   </filter>
   <filter id="glow" x="-200%" y="-200%" width="500%" height="500%">
-    <feGaussianBlur stdDeviation="1.5" result="halo"/>
+    <feGaussianBlur stdDeviation="1.3" result="halo"/>
     <feMerge><feMergeNode in="halo"/><feMergeNode in="halo"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
-  <linearGradient id="armorL" x1="0" y1="0" x2=".75" y2="1"><stop stop-color="#87888b"/><stop offset=".37" stop-color="#62636b"/><stop offset="1" stop-color="#303039"/></linearGradient>
-  <linearGradient id="armorR" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#71747a"/><stop offset=".55" stop-color="#464951"/><stop offset="1" stop-color="#252b34"/></linearGradient>
-  <linearGradient id="body" x1="0" x2="1"><stop stop-color="#292c34"/><stop offset=".29" stop-color="#81858b"/><stop offset=".38" stop-color="#989b9b"/><stop offset=".68" stop-color="#4c515d"/><stop offset="1" stop-color="#252934"/></linearGradient>
-  <linearGradient id="conduit" x1="0" x2="1"><stop stop-color="#251e36"/><stop offset=".27" stop-color="#b896d7"/><stop offset=".46" stop-color="#775f9e"/><stop offset="1" stop-color="#241c3e"/></linearGradient>
-  <radialGradient id="reactor" cx=".32" cy=".27"><stop stop-color="#f7e5ff"/><stop offset=".2" stop-color="#d498fc"/><stop offset=".58" stop-color="#7539ac"/><stop offset="1" stop-color="#211b3d"/></radialGradient>
-  <radialGradient id="nozzle"><stop stop-color="#121519"/><stop offset=".64" stop-color="#33323b"/><stop offset=".87" stop-color="#7b706b"/><stop offset="1" stop-color="#20262c"/></radialGradient>
-  <g id="airframe"><path d="M100 12 140 12l12 13 42 7 30 18 2 19-16 14-30-4-24 16-17 30-19 13-19-13-17-30-24-16-30 4-16-14 2-19 30-18 42-7Z"/></g>
+  <linearGradient id="plateL" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#85898f"/><stop offset=".46" stop-color="#454c56"/><stop offset="1" stop-color="#222936"/></linearGradient>
+  <linearGradient id="plateR" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#545a63"/><stop offset=".52" stop-color="#303742"/><stop offset="1" stop-color="#151e29"/></linearGradient>
+  <linearGradient id="armorL" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a2a5a6"/><stop offset=".55" stop-color="#6b707a"/><stop offset="1" stop-color="#3c4550"/></linearGradient>
+  <linearGradient id="armorR" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#626671"/><stop offset="1" stop-color="#282f3a"/></linearGradient>
+  <linearGradient id="metal" x1="0" x2="1"><stop stop-color="#151924"/><stop offset=".32" stop-color="#686a77"/><stop offset=".6" stop-color="#363944"/><stop offset="1" stop-color="#131923"/></linearGradient>
+  <linearGradient id="film" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff8a5c"/><stop offset=".5" stop-color="#9b6bff"/><stop offset="1" stop-color="#3fd0d8"/></linearGradient>
+  <radialGradient id="reactor" cx=".34" cy=".3"><stop stop-color="#fff1ff"/><stop offset=".25" stop-color="#c398ef"/><stop offset=".62" stop-color="#683895"/><stop offset="1" stop-color="#19192f"/></radialGradient>
+  <g id="airframe"><path d="M103 9h34l16 12 41 3 34 15 1 25-17 15-34-3-28 29-12 23-18 11-18-11-12-23-28-29-34 3-17-15 1-25 34-15 41-3Z"/></g>
+  <g id="glyph"><path d="M0-5 4-3v6L0 5l-4-2v-6Z" fill="#4e202c"/><path d="m0-2.7 2.5 4h-5Z" fill="#e96566"/></g>
 </defs>
 <use href="#airframe" xlink:href="#airframe" filter="url(#shadow)"/>
-<!-- Wing shoulders carry dense ablative plate and protruding ram forks. -->
-<g filter="url(#bevel)"><path d="M102 27 46 31 16 50 14 69 30 83 63 76 91 98 108 71Z" fill="url(#armorL)"/><path d="M138 27 194 31 224 50 226 69 210 83 177 76 149 98 132 71Z" fill="url(#armorR)"/></g>
-<path d="M17 51 48 35 88 33m135 18-31-16-40-2M17 68l15 12 31-8 31 22m129-26-15 12-31-8-31 22" fill="none" stroke="#bdc0bb" stroke-width=".9" opacity=".48"/>
-<path d="M38 38 42 66 67 67 89 88m113-50-4 28-25 1-22 21M18 56l37-5 29 9m138-4-37-5-29 9" fill="none" stroke="#171c25" stroke-width="1.15" opacity=".8"/>
-<path d="M20 62 38 60 47 69 31 72Z M220 62l-18-2-9 9 16 3Z" fill="#87908d" stroke="#222830" stroke-width="1"/>
-<path d="M28 47 34 44l9 5-7 7Z M212 47l-6-3-9 5 7 7Z" fill="#8f2a22" opacity=".85"/>
-<!-- Scalloped forward armor, dark seams reinforce the anti-ramming wedge. -->
-<g filter="url(#bevel)"><path d="M68 69 91 65 111 85 120 127 100 113 77 91 58 84Z" fill="url(#armorL)"/><path d="M172 69 149 65 129 85 120 127 140 113 163 91 182 84Z" fill="url(#armorR)"/></g>
-<path d="M66 74 89 71 106 91l10 31-19-17-20-20Zm108 0-23-3-17 20-10 31 19-17 20-20Z" fill="none" stroke="#202831" stroke-width="1.2"/>
-<path d="m70 79 18-2 13 18m69-16-18-2-13 18" fill="none" stroke="#b9b8bb" opacity=".65"/>
-<!-- Twin engines deep under aft transverse blast wall. -->
-<g filter="url(#bevel)"><path d="m81 32 7-19h20l8 28-12 12-15-5Z M159 32l-7-19h-20l-8 28 12 12 15-5Z" fill="url(#body)"/></g>
-<ellipse cx="98" cy="15" rx="8" ry="4" fill="url(#nozzle)"/><ellipse cx="142" cy="15" rx="8" ry="4" fill="url(#nozzle)"/>
-<path d="M92 15v11m3-12v12m6-12v12m3-11v11m32-11v11m3-12v12m6-12v12m3-11v11" stroke="#20262b" stroke-width="1"/>
-<path d="M88 36h21m22 0h21m-67 5 23 2m24 0 23-2" stroke="#bac0b9" stroke-width=".8" opacity=".56"/>
-<!-- Armored reactor spine, purple plasma behind raised metal ducts. -->
-<path d="M101 13h38l17 31-7 38-15 40-14 16-14-16-15-40-7-38Z" fill="url(#body)" filter="url(#bevel)"/>
-<path d="M100 18h40l9 24-10 7h-38l-10-7Z" fill="#34323d" stroke="#a7a8a8" stroke-width=".8"/>
-<path d="M98 25h44m-48 12h52M93 46l4 35 14 37m36-72-4 35-14 37" fill="none" stroke="#1c222b" stroke-width="1"/>
-<path d="M98 28h44M95 49l5 28m45-28-5 28" fill="none" stroke="#d1d2ca" stroke-width=".7" opacity=".6"/>
-<path d="M101 50 109 45h22l8 5-2 25-7 20-20 0-7-20Z" fill="#27242f" stroke="#9ba0a3" stroke-width="1.1"/>
-<path d="M109 52 113 49h14l4 3-3 26-8 12-8-12Z" fill="#392448" stroke="#9d8ca9" stroke-width=".9"/>
-<ellipse cx="120" cy="66" rx="10" ry="14" fill="url(#reactor)"/>
-<path d="M113 59q3-5 9-6" fill="none" stroke="#f7deff" stroke-width="1.2" opacity=".85"/>
-<!-- Four sheathed conduits feed the forward impact coupler. -->
-<path d="M110 77q-13 5-17 20l17 29 8 7-13-32 9-17 M130 77q13 5 17 20l-17 29-8 7 13-32-9-17" fill="#1c1c2b" stroke="#87909b" stroke-width="1"/>
-<path d="M110 80q-11 8-11 17l12 25m19-42q11 8 11 17l-12 25" fill="none" stroke="url(#conduit)" stroke-width="5"/>
-<path d="M108 88 101 91m5 9-7 4m8 7-5 4m30-27 7 3m-5 9 7 4m-8 7 5 4" stroke="#929298" stroke-width="2"/>
-<path d="M115 89 120 98l5-9 5 8-4 21-6 15-6-15-4-21Z" fill="url(#body)" stroke="#343340" stroke-width="1"/>
-<path d="M117 106h6l-3 17Z" fill="#a977ce" filter="url(#glow)" opacity=".8"/>
-<path d="M119 78h2v8h-2Z" fill="#e5afff" filter="url(#glow)"/>
-<!-- Outboard plasma capacitors set in thick armored yokes. -->
-<path d="M45 55 67 50 81 62 68 76 47 72Z M195 55 173 50 159 62 172 76 193 72Z" fill="#272936" stroke="#939ba0" stroke-width="1"/>
-<path d="M50 58 65 55 75 62 66 71 51 68Z M190 58l-15-3-10 7 9 9 15-3Z" fill="url(#reactor)" stroke="#262030" stroke-width="2"/>
-<path d="M52 60 57 57m131 3-5-3" stroke="#f2d7ff" opacity=".8"/>
-<path d="M58 72 82 87l13 15m87-30-24 15-13 15" fill="none" stroke="#9879af" stroke-width="1.8" opacity=".7"/>
-<path d="M41 75h6m152 0h-6" stroke="#bc95dc" stroke-width="2"/>
-<use href="#airframe" xlink:href="#airframe" filter="url(#grime)" opacity=".48"/>
+<!-- Wide stern hammerhead and engine blocks; all forward mass converges on a solid ram. -->
+<g filter="url(#hull)"><path d="M106 24 46 24 12 39 11 64l17 15 36-6 40 34 24-51Z" fill="url(#plateL)"/><path d="M134 24 194 24l34 15 1 25-17 15-36-6-40 34-24-51Z" fill="url(#plateR)"/><path d="M13 40 50 28 101 29 87 47 45 54 12 56Z M227 40l-37-12-51 1 14 18 42 7 33 2Z" fill="url(#armorL)"/><path d="M33 72 70 59l35 39-21-8-22-16Z M207 72l-37-13-35 39 21-8 22-16Z" fill="url(#armorR)"/></g>
+<path d="M18 42 48 32l49-1m125 11-30-10-49-1M14 63l15 12 35-5 27 26m135-33-15 12-35-5-27 26" fill="none" stroke="#0d121a" stroke-width="1.15" opacity=".7"/>
+<path d="M14 43 50 29l38 2-13 14-31 9-32 2Z M226 43l-36-14-38 2 13 14 31 9 32 2Z" fill="url(#film)" opacity=".1"/>
+<path d="M18 55 42 50l15-10 12-2m153 17-24-5-15-10-12-2" fill="none" stroke="#a5a5ae" stroke-width=".6" opacity=".28"/>
+<!-- Heat-resistant tile shingles and recessed thermal vents on the broad shoulders. -->
+<path d="M25 44 49 34l12 1-16 13-20 5Zm31-8 17-3-10 11-15 5Zm159 8-24-10-12 1 16 13 20 5Zm-31-8-17-3 10 11 15 5Z" fill="#141c27" opacity=".26"/>
+<path d="M20 60 45 55 74 51m146 9-25-5-29-4M38 69l20-6 25 20m119-14-20-6-25 20" fill="none" stroke="#121720" stroke-width="1.1"/>
+<path d="M23 60 42 56m175 4-19-4M47 34l19-2m127 2-19-2" stroke="#c5c1c7" stroke-width=".55" opacity=".26"/>
+<path d="M26 65h12m165 0h12M46 61l12-4m136 4-12-4" stroke="#1a202a" stroke-width="1.4"/>
+<path d="M28 46v5m4-7v5m4-7v5m176-1v5m-4-7v5m-4-7v5" stroke="#1a2028" stroke-width="1.4"/>
+<path d="M65 34h13m-14 3h11m-13 3h10m113-6h-13m14 3h-11m13 3h-10" stroke="#191e29" stroke-width="1.5"/>
+<!-- Four large stern drives, hot ceramic throat liners and particulate scorches. -->
+<path d="M49 25 58 11h17l9 24-12 18-17-7Z M191 25l-9-14h-17l-9 24 12 18 17-7Z" fill="url(#metal)" filter="url(#hull)"/>
+<path d="M57 14h19v7H54Zm107 0h19l3 7h-22Z" fill="#111721"/>
+<path d="M59 19v9m4-9v9m4-9v9m4-9v9m98-9v9m4-9v9m4-9v9m4-9v9" stroke="#101620" stroke-width="1"/>
+<path d="M50 30 80 35m110-5-30 5" stroke="#6a5360" stroke-width="4" opacity=".3"/>
+<g filter="url(#glow)"><path d="M57 12h18m90 0h18" stroke="#ff7a45" stroke-width="3"/></g>
+<path d="M61 12h10m98 0h10" stroke="#ffe9de" stroke-width=".7"/>
+<!-- Aft circular reactor is deeply buried between stern-mounted machinery. -->
+<path d="M102 10h36l16 19-5 29-29 16-29-16-5-29Z" fill="url(#metal)" filter="url(#hull)"/>
+<path d="M103 13h34l12 18-5 25-24 13-24-13-5-25Z" fill="#2b2b39"/>
+<path d="M96 28h48m-49 30 25 13 25-13" stroke="#101720" stroke-width="1.1" fill="none"/>
+<path d="M120 26 133 33v15l-13 7-13-7V33Z" fill="#101522" stroke="#585565" stroke-width="1"/>
+<circle cx="120" cy="40" r="10" fill="#121424"/>
+<circle cx="120" cy="40" r="7" fill="url(#reactor)"/>
+<path d="M112 37h-8m24 0h8m-16-7v-7m0 31v-7" stroke="#89909a" stroke-width="2.3"/>
+<path d="M111 49h18" stroke="#181c2a" stroke-width="3"/>
+<path d="M115 35h4" stroke="#f3d8ff" stroke-width=".7" opacity=".7"/>
+<!-- Armored power channels descend on either side of the long solid impact spar. -->
+<path d="M96 54 77 69 88 88 102 115 112 118l-8-30 8-29Zm48 0 19 15-11 19-14 27-10 3 8-30-8-29Z" fill="#171a27" stroke="#323342" stroke-width=".7"/>
+<path d="M99 55 86 70l14 25 8 17m33-57 13 15-14 25-8 17" stroke="#38294d" stroke-width="5" fill="none"/>
+<path d="M101 57 90 71l13 25 7 14m29-53 11 14-13 25-7 14" stroke="#9a6ac0" stroke-width="1.8" opacity=".85" fill="none"/>
+<path d="M89 73l8 3m-5 5 8 3m-4 6 8 3m47-20-8 3m5 5-8 3m4 6-8 3" stroke="#535566" stroke-width="1.6"/>
+<!-- Battering ram: a continuous reinforced wedge under staggered ceramic scales. -->
+<path d="M120 53 147 72 151 91 139 115 120 139 101 115 89 91 93 72Z" fill="url(#metal)" filter="url(#hull)"/>
+<path d="M120 57 145 75 145 91 135 112 120 136 105 112 95 91 95 75Z" fill="#242b37"/>
+<path d="M96 74 120 61v73l-16-25-10-20Z" fill="url(#armorL)"/>
+<path d="M144 74 120 61v73l16-25 10-20Z" fill="url(#armorR)"/>
+<path d="M96 75 120 67 144 75 138 84 120 92 102 84Z" fill="url(#plateL)" stroke="#1a1e29" stroke-width="1"/>
+<path d="M100 86 120 93 140 86 136 99 120 107 104 99Z" fill="url(#armorL)" stroke="#171b25" stroke-width="1"/>
+<path d="M105 102 120 109 135 102 130 115 120 123 110 115Z" fill="url(#plateR)" stroke="#171d28" stroke-width="1"/>
+<path d="M111 117 120 124 129 117 125 130 120 138 115 130Z" fill="#252c38" stroke="#141820" stroke-width="1.1"/>
+<path d="M102 77 120 72m-15 15 15 7m-12 9 12 8m-8 9 8 7" stroke="#dee2df" stroke-width=".5" opacity=".27" fill="none"/>
+<path d="M120 68v63m-19-50 5 2m33-2-5 2m-26 17 5 3m19-3-5 3" stroke="#121622" stroke-width="1.15"/>
+<path d="M112 95l8 5 8-5m-13 19 5 4 5-4" stroke="#191a27" stroke-width="1" fill="none"/>
+<use href="#glyph" xlink:href="#glyph" transform="translate(40 69) rotate(-16)"/><use href="#glyph" xlink:href="#glyph" transform="translate(200 69) rotate(16)"/>
+<path d="M21 63h7m191 0h-7" stroke="#a277ca" stroke-width="1" filter="url(#glow)"/>
+<use href="#airframe" xlink:href="#airframe" filter="url(#wear)" opacity=".3"/>
 </svg>

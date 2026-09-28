@@ -1,63 +1,77 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="100" viewBox="0 0 120 100">
 <defs>
-  <filter id="bevel" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+  <filter id="hull" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
     <feGaussianBlur in="SourceAlpha" stdDeviation="1.1" result="height"/>
-    <feDiffuseLighting in="height" surfaceScale="2.6" diffuseConstant="1.18" lighting-color="#fff" result="diffuse"><feDistantLight azimuth="225" elevation="52"/></feDiffuseLighting>
-    <feSpecularLighting in="height" surfaceScale="2.6" specularConstant=".75" specularExponent="18" lighting-color="#fff4df" result="specular"><feDistantLight azimuth="225" elevation="44"/></feSpecularLighting>
+    <feDiffuseLighting in="height" surfaceScale="2.4" diffuseConstant="1.22" lighting-color="#fff" result="diffuse"><feDistantLight azimuth="225" elevation="54"/></feDiffuseLighting>
+    <feSpecularLighting in="height" surfaceScale="2.4" specularConstant=".95" specularExponent="30" lighting-color="#f4f9ff" result="specular"><feDistantLight azimuth="225" elevation="40"/></feSpecularLighting>
+    <feSpecularLighting in="height" surfaceScale="2.4" specularConstant=".5" specularExponent="14" lighting-color="#7fc4ff" result="rim"><feDistantLight azimuth="30" elevation="24"/></feSpecularLighting>
     <feComposite in="SourceGraphic" in2="diffuse" operator="arithmetic" k1="1" result="lit"/>
-    <feComposite in="specular" in2="SourceAlpha" operator="in" result="gloss"/>
-    <feComposite in="gloss" in2="lit" operator="arithmetic" k2=".38" k3="1" result="shaded"/>
+    <feComposite in="specular" in2="rim" operator="arithmetic" k2="1" k3=".55" result="gloss0"/>
+    <feComposite in="gloss0" in2="SourceAlpha" operator="in" result="gloss"/>
+    <feComposite in="gloss" in2="lit" operator="arithmetic" k2=".42" k3="1" result="shaded"/>
     <feComposite in="shaded" in2="SourceAlpha" operator="in"/>
   </filter>
-  <filter id="grime" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+  <filter id="wear" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
     <feTurbulence type="fractalNoise" baseFrequency=".07 .12" numOctaves="3" seed="41" result="mottle"/>
-    <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="5" result="grain"/>
-    <feComposite in="mottle" in2="grain" operator="arithmetic" k2=".7" k3=".3"/>
-    <feColorMatrix type="matrix" values="0 0 0 0 .1  0 0 0 0 .07  0 0 0 0 .05  -1.6 0 0 0 1.05"/>
+    <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="2" seed="17" result="grain"/>
+    <feComposite in="mottle" in2="grain" operator="arithmetic" k2=".75" k3=".25"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 .06  0 0 0 0 .05  0 0 0 0 .05  -1.7 0 0 0 1.02"/>
     <feComposite in2="SourceAlpha" operator="in"/>
   </filter>
   <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
     <feGaussianBlur in="SourceAlpha" stdDeviation="2.2"/>
     <feOffset dx="2.5" dy="4.5" result="blur"/>
-    <feFlood flood-color="#02070d" flood-opacity=".5"/>
+    <feFlood flood-color="#01050b" flood-opacity=".5"/>
     <feComposite in2="blur" operator="in"/>
   </filter>
   <filter id="glow" x="-200%" y="-200%" width="500%" height="500%">
-    <feGaussianBlur stdDeviation="1.5" result="halo"/>
+    <feGaussianBlur stdDeviation="1.3" result="halo"/>
     <feMerge><feMergeNode in="halo"/><feMergeNode in="halo"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
-  <linearGradient id="wingL" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#889287"/><stop offset=".5" stop-color="#646f66"/><stop offset="1" stop-color="#414d47"/></linearGradient>
-  <linearGradient id="wingR" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#68766a"/><stop offset=".5" stop-color="#4f5e57"/><stop offset="1" stop-color="#333f3a"/></linearGradient>
-  <linearGradient id="body" x1="0" x2="1"><stop stop-color="#454e49"/><stop offset=".28" stop-color="#b1bbab"/><stop offset=".4" stop-color="#c2caba"/><stop offset=".7" stop-color="#6c7970"/><stop offset="1" stop-color="#343e3d"/></linearGradient>
-  <linearGradient id="arm" x1="0" x2="1"><stop stop-color="#343f3d"/><stop offset=".32" stop-color="#adbcac"/><stop offset=".65" stop-color="#777f74"/><stop offset="1" stop-color="#2d3736"/></linearGradient>
-  <radialGradient id="lamp"><stop stop-color="#d8ffde"/><stop offset=".32" stop-color="#82dc9b"/><stop offset=".75" stop-color="#248044"/><stop offset="1" stop-color="#133825"/></radialGradient>
-  <g id="airframe"><path d="M60 94 48 77 39 72 29 78 28 91 21 95 17 88 16 74 8 68 7 32 43 36 47 13 53 8 67 8 73 13 77 36 113 32 112 68 104 74 84 76 72 77Z"/></g>
+  <linearGradient id="wingL" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e1e4dc"/><stop offset=".5" stop-color="#aab4ae"/><stop offset="1" stop-color="#687873"/></linearGradient>
+  <linearGradient id="wingR" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#b2bcb5"/><stop offset=".5" stop-color="#879891"/><stop offset="1" stop-color="#52615d"/></linearGradient>
+  <linearGradient id="body" x1="0" x2="1"><stop stop-color="#52625e"/><stop offset=".27" stop-color="#e5e9e3"/><stop offset=".47" stop-color="#b6c5ba"/><stop offset="1" stop-color="#53635f"/></linearGradient>
+  <linearGradient id="arm" x1="0" x2="1"><stop stop-color="#343c3a"/><stop offset=".3" stop-color="#c2d0c5"/><stop offset=".7" stop-color="#80938b"/><stop offset="1" stop-color="#303e3a"/></linearGradient>
+  <linearGradient id="film" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff8a5c"/><stop offset=".5" stop-color="#9b6bff"/><stop offset="1" stop-color="#3fd0d8"/></linearGradient>
+  <radialGradient id="lamp"><stop stop-color="#effff1"/><stop offset=".25" stop-color="#a8ffc0"/><stop offset=".72" stop-color="#32a464"/><stop offset="1" stop-color="#17462e"/></radialGradient>
+  <g id="airframe"><path d="M60 94 47 77 41 73 32 76 28 86 32 93 27 96 22 91 19 96 16 91 18 82 16 73 7 68 7 31 44 36 49 17 53 8H67L71 17 76 36 113 31 113 68 104 73 79 73 73 77Z"/></g>
 </defs>
 <use href="#airframe" xlink:href="#airframe" filter="url(#shadow)"/>
-<!-- Squared utility wing with heavy removable service modules. -->
-<g filter="url(#bevel)"><path d="M47 36 7 32 8 68 45 74 53 53Z" fill="url(#wingL)"/><path d="M73 36 113 32 112 68 75 74 67 53Z" fill="url(#wingR)"/></g>
-<path d="M9 34 45 38 M111 34 75 38 M9 65 45 70 M111 65 75 70 M32 36v34 M88 36v34 M12 52h32 M108 52H76" stroke="#27352f" stroke-width=".65" fill="none" opacity=".7"/>
-<path d="M9 35 42 38 M111 35 78 38 M10 65 35 68 M110 65 85 68" stroke="#d5dfce" stroke-width=".55" fill="none" opacity=".55"/>
-<path d="M88 43h17v14H88Z" fill="#535e56"/><path d="M90 45h13v10H90Z" fill="#a9b8a9"/><path d="M95 46h3v3h4v3h-4v3h-3v-3h-4v-3h4Z" fill="#338b53"/>
-<path d="M13 46h16v16H13Z" fill="#535d54"/><path d="M15 48h12v12H15Z" fill="#a0ad9e"/><path d="M19.5 49h3v3h3v3h-3v3h-3v-3h-3v-3h3Z" fill="#317d4c"/>
-<!-- Wing-mounted service nacelles, vents and heat-stained impellers. -->
-<g filter="url(#bevel)"><path d="M37 29 46 32 47 63 40 72 34 68 34 38Z M83 29 74 32 73 63 80 72 86 68 86 38Z" fill="#69766c"/><path d="M52 10h16l4 20H48Z" fill="#67736b"/></g>
-<path d="M36 32h8l1 8h-9Z M84 32h-8l-1 8h9Z" fill="#1e2828"/><path d="M36 32h8 M84 32h-8" stroke="#c0d0b8" stroke-width=".7"/>
-<path d="M37 59h8l-1 8-3 3-4-3Z M83 59h-8l1 8 3 3 4-3Z" fill="#343a36"/>
-<path d="M38 63h6 M76 63h6 M40 65v4 M42 65v4 M78 65v4 M80 65v4" stroke="#b2a18a" stroke-width=".55"/>
-<!-- Jointed manipulator folds beneath left wing; tool claws point down to the player. -->
-<path d="M25 68 38 65 40 71 28 75Z" fill="url(#arm)" filter="url(#bevel)"/>
-<circle cx="27" cy="74" r="3.3" fill="#2f3937"/><circle cx="27" cy="74" r="1.5" fill="#adb9ab"/>
-<path d="M25 76 26 87 21 91 19 88 22 85 21 77Z" fill="url(#arm)"/><path d="M27 76 30 86 28 91 25 90 26 85 24 78Z" fill="#6d7c70"/>
-<path d="M18 90 21 95 25 92 M26 91 29 95 33 92" fill="none" stroke="#97b3a2" stroke-width="1.6" stroke-linejoin="round"/>
-<path d="M22 75 27 74 29 77 M22 85 26 86" fill="none" stroke="#d0dcc9" stroke-width=".65"/>
-<path d="M47 13h26l-2 13H49Z" fill="#303b37"/><path d="M50 13h20 M52 17h16" stroke="#a7b6a4" stroke-width=".75"/>
-<path d="M60 94 49 78 47 60 48 35 51 26 69 26 72 35 73 60 71 78Z" fill="url(#body)" filter="url(#bevel)"/>
-<path d="M60 93 53 79 50 58 70 58 67 79Z" fill="#718073" opacity=".55"/>
-<path d="M52 36h16l-1 16H53Z" fill="#4c6057"/><path d="M54 38h12v12H54Z" fill="#bbcbba"/><path d="M58 39h4v3h3v4h-3v3h-4v-3h-3v-4h3Z" fill="#29844b"/>
-<path d="M49 57h22 M52 76h16 M58 84h4" stroke="#2b3731" stroke-width=".7" fill="none"/>
-<path d="M56 66h8v7h-8Z M55 29h10" stroke="#293f34" stroke-width=".6" fill="none"/>
-<circle cx="12" cy="66" r="1.4" fill="url(#lamp)" filter="url(#glow)"/><circle cx="108" cy="66" r="1.4" fill="url(#lamp)" filter="url(#glow)"/>
-<path d="M90 61h14v2H90Z" fill="#9a4030" opacity=".65"/>
-<use href="#airframe" xlink:href="#airframe" filter="url(#grime)" opacity=".47"/>
+<!-- Boxy removable service wing with broad visible ceramic panels. -->
+<g filter="url(#hull)"><path d="M48 37 7 31 7 68 42 76 53 57Z" fill="url(#wingL)"/><path d="M72 37 113 31 113 68 78 76 67 57Z" fill="url(#wingR)"/><path d="M37 30 45 32 49 67 42 76 33 72 34 36Z M83 30 75 32 71 67 78 76 87 72 86 36Z" fill="url(#arm)"/></g>
+<path d="M8 34 46 40 47 45 8 41Z M112 34 74 40 73 45 112 41Z" fill="#3a4947"/>
+<path d="M9 35 43 40 M111 35 77 40 M9 66 36 71 M111 66 84 71 M15 42v23 M105 42v23 M32 43v27 M88 43v27" fill="none" stroke="#31413d" stroke-width=".75"/>
+<path d="M11 42h21v22H11Z M109 42H88v22h21Z" fill="url(#film)" opacity=".1"/>
+<path d="M13 44h16v16H13Z M107 44H91v16h16Z" fill="#647771" stroke="#dce5db" stroke-width=".55"/>
+<path d="M15 46h12v12H15Z M105 46H93v12h12Z" fill="#ccd9cb"/>
+<path d="M19.5 47h3v3h3v3h-3v3h-3v-3h-3v-3h3Z M97.5 47h3v3h3v3h-3v3h-3v-3h-3v-3h3Z" fill="#2b9a5a"/>
+<path d="M13 44h16 M107 44H91" stroke="#f2f6ee" stroke-width=".65" opacity=".65"/>
+<path d="M36 34h9l1 8H35Z M84 34h-9l-1 8h11Z" fill="#1b2928"/>
+<path d="M37 35h7 M83 35h-7" stroke="#d5e3d9" stroke-width=".7"/>
+<!-- Compact twin lift engines with warm exhaust toward the top. -->
+<path d="M51 13h7l-1 15h-9Z M62 13h7l3 15h-9Z" fill="#667772" filter="url(#hull)"/>
+<path d="M51 12h7v3h-7Z M62 12h7v3h-7Z" fill="#222c29"/>
+<g filter="url(#glow)"><rect x="51.5" y="8.5" width="6" height="2.1" rx="1" fill="#ff7a45"/><rect x="62.5" y="8.5" width="6" height="2.1" rx="1" fill="#ff7a45"/></g>
+<path d="M53 9.5h3 M64 9.5h3" stroke="#fff3df" stroke-width=".55"/>
+<!-- Green status-illuminated articulated repair arm extending ahead of the port wing. -->
+<path d="M32 66 41 62 44 68 33 74 27 77 24 72Z" fill="url(#arm)" filter="url(#hull)"/>
+<circle cx="27" cy="75" r="3.6" fill="#273631" stroke="#c5d2c6" stroke-width=".7"/>
+<circle cx="27" cy="75" r="1.4" fill="url(#lamp)"/>
+<path d="M26 78 24 85 20 86 18 82 19 94 22 96 27 91 29 87 30 79Z" fill="url(#arm)" filter="url(#hull)"/>
+<path d="M20 87 17 91 19 96 22 92 M28 87l4 4-5 5-4-3" stroke="#819d8e" stroke-width="1.4" fill="none" stroke-linejoin="round"/>
+<path d="M21 82 26 82 M20 91l2 1 M27 90l3 1" stroke="#e5eee3" stroke-width=".6"/>
+<circle cx="29" cy="86" r="1.4" fill="url(#lamp)" filter="url(#glow)"/>
+<g filter="url(#hull)"><path d="M60 94 48 76 46 53 48 35 52 18H60Z" fill="url(#body)"/><path d="M60 94 72 76 74 53 72 35 68 18H60Z" fill="#80968a"/></g>
+<path d="M60 94 48 76 46 53 48 35 52 18H68L72 35 74 53 72 76Z" fill="url(#film)" opacity=".08"/>
+<path d="M51 30h18l-2 13H53Z" fill="#314842"/><path d="M53 31h14 M54 40h12" stroke="#dce8dc" stroke-width=".65"/>
+<path d="M52 47h16v15H52Z" fill="#7a9a88" stroke="#31483b" stroke-width=".7"/>
+<path d="M54 49h12v11H54Z" fill="#d9e6da"/>
+<path d="M58.5 50h3v3h3v3h-3v3h-3v-3h-3v-3h3Z" fill="#278c53"/>
+<path d="M50 65h20 M53 77h14 M58 87h4" stroke="#405a4e" stroke-width=".7"/>
+<circle cx="11" cy="66" r="1.7" fill="url(#lamp)" filter="url(#glow)"/>
+<circle cx="109" cy="66" r="1.7" fill="url(#lamp)" filter="url(#glow)"/>
+<path d="M78 67h23" stroke="#99392f" stroke-width="1.3"/>
+<path d="M80 68h13" stroke="#ffe7ba" stroke-width=".4"/>
+<path d="M58 79h4l-2 5Z" fill="#1a4735"/>
+<use href="#airframe" xlink:href="#airframe" filter="url(#wear)" opacity=".3"/>
 </svg>

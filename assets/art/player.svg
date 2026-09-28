@@ -1,152 +1,156 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="160" height="120" viewBox="0 0 160 120">
 <defs>
-  <!-- Shared realistic material kit: light from upper-left (azimuth 225°). -->
-  <filter id="bevel" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
-    <feGaussianBlur in="SourceAlpha" stdDeviation="1.1" result="height"/>
-    <feDiffuseLighting in="height" surfaceScale="2.6" diffuseConstant="1.18" lighting-color="#fff" result="diffuse"><feDistantLight azimuth="225" elevation="52"/></feDiffuseLighting>
-    <feSpecularLighting in="height" surfaceScale="2.6" specularConstant=".75" specularExponent="18" lighting-color="#fff4df" result="specular"><feDistantLight azimuth="225" elevation="44"/></feSpecularLighting>
+  <!-- Realistic-future kit: glossy ceramic clear-coat, key light upper-left (azimuth 225°), cool sky rim light. -->
+  <filter id="hull" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="1.25" result="height"/>
+    <feDiffuseLighting in="height" surfaceScale="2.4" diffuseConstant="1.14" lighting-color="#fff" result="diffuse"><feDistantLight azimuth="225" elevation="54"/></feDiffuseLighting>
+    <feSpecularLighting in="height" surfaceScale="2.4" specularConstant=".95" specularExponent="30" lighting-color="#f4f9ff" result="specular"><feDistantLight azimuth="225" elevation="40"/></feSpecularLighting>
+    <feSpecularLighting in="height" surfaceScale="2.4" specularConstant=".5" specularExponent="14" lighting-color="#7fc4ff" result="rim"><feDistantLight azimuth="30" elevation="24"/></feSpecularLighting>
     <feComposite in="SourceGraphic" in2="diffuse" operator="arithmetic" k1="1" result="lit"/>
-    <feComposite in="specular" in2="SourceAlpha" operator="in" result="gloss"/>
-    <feComposite in="gloss" in2="lit" operator="arithmetic" k2=".38" k3="1" result="shaded"/>
+    <feComposite in="specular" in2="rim" operator="arithmetic" k2="1" k3=".55" result="gloss0"/>
+    <feComposite in="gloss0" in2="SourceAlpha" operator="in" result="gloss"/>
+    <feComposite in="gloss" in2="lit" operator="arithmetic" k2=".42" k3="1" result="shaded"/>
     <feComposite in="shaded" in2="SourceAlpha" operator="in"/>
   </filter>
-  <filter id="grime" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-    <feTurbulence type="fractalNoise" baseFrequency=".055 .11" numOctaves="3" seed="7" result="mottle"/>
-    <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="3" result="grain"/>
-    <feComposite in="mottle" in2="grain" operator="arithmetic" k2=".7" k3=".3"/>
-    <feColorMatrix type="matrix" values="0 0 0 0 .08  0 0 0 0 .1  0 0 0 0 .12  -1.6 0 0 0 1.02"/>
+  <filter id="wear" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency=".05 .1" numOctaves="3" seed="17" result="mottle"/>
+    <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="2" seed="4" result="grain"/>
+    <feComposite in="mottle" in2="grain" operator="arithmetic" k2=".75" k3=".25"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 .1  0 0 0 0 .12  0 0 0 0 .15  -1.7 0 0 0 1.02"/>
     <feComposite in2="SourceAlpha" operator="in"/>
   </filter>
   <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
     <feGaussianBlur in="SourceAlpha" stdDeviation="2.4"/>
     <feOffset dx="2.5" dy="5" result="blur"/>
-    <feFlood flood-color="#02070d" flood-opacity=".5"/>
+    <feFlood flood-color="#01050b" flood-opacity=".5"/>
     <feComposite in2="blur" operator="in"/>
   </filter>
   <filter id="glow" x="-200%" y="-200%" width="500%" height="500%">
-    <feGaussianBlur stdDeviation="1.4" result="halo"/>
+    <feGaussianBlur stdDeviation="1.3" result="halo"/>
     <feMerge><feMergeNode in="halo"/><feMergeNode in="halo"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
-  <linearGradient id="paintWingL" x1="1" y1="0" x2="0" y2="1">
-    <stop offset="0" stop-color="#9aa6ae"/><stop offset=".55" stop-color="#87939c"/><stop offset="1" stop-color="#76828b"/>
+  <!-- Pearl ceramic composite, left wing faces the light -->
+  <linearGradient id="wingL" x1="1" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#d9dfe3"/><stop offset=".5" stop-color="#bcc5cc"/><stop offset="1" stop-color="#a4aeb6"/>
   </linearGradient>
-  <linearGradient id="paintWingR" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#88949d"/><stop offset=".55" stop-color="#7a8690"/><stop offset="1" stop-color="#66727c"/>
+  <linearGradient id="wingR" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#bcc5cc"/><stop offset=".5" stop-color="#a3adb5"/><stop offset="1" stop-color="#87929b"/>
   </linearGradient>
-  <linearGradient id="fuselage" x1="0" x2="1">
-    <stop offset="0" stop-color="#6d7982"/><stop offset=".2" stop-color="#b8c2c7"/><stop offset=".38" stop-color="#d6dde0"/><stop offset=".62" stop-color="#8e9aa2"/><stop offset="1" stop-color="#505c66"/>
+  <linearGradient id="body" x1="0" x2="1">
+    <stop offset="0" stop-color="#7c8891"/><stop offset=".2" stop-color="#d6dde1"/><stop offset=".36" stop-color="#f1f4f5"/><stop offset=".6" stop-color="#b2bcc3"/><stop offset="1" stop-color="#65717b"/>
   </linearGradient>
   <linearGradient id="nacelle" x1="0" x2="1">
-    <stop offset="0" stop-color="#5d6973"/><stop offset=".3" stop-color="#aab5bb"/><stop offset=".55" stop-color="#8a959d"/><stop offset="1" stop-color="#46525c"/>
+    <stop offset="0" stop-color="#5a646c"/><stop offset=".3" stop-color="#c7cfd4"/><stop offset=".55" stop-color="#9ca6ae"/><stop offset="1" stop-color="#4d5760"/>
   </linearGradient>
-  <linearGradient id="radome" x1="0" x2="1">
-    <stop offset="0" stop-color="#4f5a62"/><stop offset=".35" stop-color="#8d979d"/><stop offset="1" stop-color="#3e4850"/>
+  <linearGradient id="graphite" x1="0" x2="1">
+    <stop offset="0" stop-color="#1c2127"/><stop offset=".35" stop-color="#4a525a"/><stop offset="1" stop-color="#20252b"/>
   </linearGradient>
-  <radialGradient id="canopy" cx=".36" cy=".3" r=".8">
-    <stop offset="0" stop-color="#fff6d2"/><stop offset=".12" stop-color="#d9c27a"/><stop offset=".38" stop-color="#7c6b3a"/><stop offset=".7" stop-color="#2d2b22"/><stop offset="1" stop-color="#0d1115"/>
+  <!-- Thin-film radar coating shimmer -->
+  <linearGradient id="film" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#63e0ef"/><stop offset=".45" stop-color="#9c8cff"/><stop offset="1" stop-color="#ffc17a"/>
+  </linearGradient>
+  <!-- Electrochromic canopy: smoked gold with sky reflection -->
+  <linearGradient id="canopy" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#9fd8ea"/><stop offset=".18" stop-color="#3f6f84"/><stop offset=".45" stop-color="#1a2834"/><stop offset=".75" stop-color="#5a4524"/><stop offset="1" stop-color="#c79b45"/>
+  </linearGradient>
+  <linearGradient id="nozzle" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#474f57"/><stop offset=".5" stop-color="#262c33"/><stop offset=".8" stop-color="#3b3530"/><stop offset="1" stop-color="#171a1e"/>
+  </linearGradient>
+  <radialGradient id="lens" cx=".38" cy=".34" r=".7">
+    <stop offset="0" stop-color="#eaffff"/><stop offset=".22" stop-color="#46d7ef"/><stop offset=".6" stop-color="#0d4c63"/><stop offset="1" stop-color="#061520"/>
   </radialGradient>
-  <radialGradient id="nozzle" cx=".5" cy=".35" r=".6">
-    <stop offset="0" stop-color="#1a1411"/><stop offset=".55" stop-color="#3a2b24"/><stop offset=".8" stop-color="#6b5a4d"/><stop offset="1" stop-color="#2a2d31"/>
-  </radialGradient>
-  <linearGradient id="petals" x1="0" x2="1">
-    <stop offset="0" stop-color="#3b3f44"/><stop offset=".3" stop-color="#8a8680"/><stop offset=".5" stop-color="#b19a7e"/><stop offset=".75" stop-color="#6c5f55"/><stop offset="1" stop-color="#2c2f33"/>
-  </linearGradient>
-  <linearGradient id="missile" x1="0" x2="1">
-    <stop offset="0" stop-color="#8a8f92"/><stop offset=".35" stop-color="#eef0ec"/><stop offset="1" stop-color="#7d8285"/>
-  </linearGradient>
-
+  <pattern id="tiles" width="5" height="4.33" patternUnits="userSpaceOnUse">
+    <path d="M0 2.17 1.25 0h2.5L5 2.17 3.75 4.33h-2.5Z" fill="none" stroke="#26313b" stroke-width=".3"/>
+  </pattern>
   <g id="airframe">
-    <path d="M58 50 12 82 13 90 57 86Z M102 50 148 82 147 90 103 86Z"/>
-    <path d="M57 92 36 104 37 110 58 106Z M103 92 124 104 123 110 102 106Z"/>
-    <path d="M57.4 47C56.5 62 56.5 90 57.4 106L58 113.5h14L72.6 106 73 46Z M102.6 47C103.5 62 103.5 90 102.6 106L102 113.5H88L87.4 106 87 46Z"/>
-    <path d="M80 3C76.5 9 73 20 71 33L66 46 73 56 74 98 77 106h6l3-8 1-42 7-10-5-13C87 20 83.5 9 80 3Z"/>
+    <path d="M80 3C77 8 75.5 14 74.5 22L73 28 56 38 56.5 41.5 70.6 42.5 14 80 8 84 9 90 38 92 46 99 59 100 59 112H70.5L72 104 80 107 88 104 89.5 112H101V100L114 99 122 92 151 90 152 84 146 80 89.4 42.5 103.5 41.5 104 38 87 28 85.5 22C84.5 14 83 8 80 3Z"/>
   </g>
 </defs>
 
 <use href="#airframe" xlink:href="#airframe" filter="url(#shadow)"/>
 
-<!-- Wings, root to tip, with leading-edge and flap articulation -->
-<g filter="url(#bevel)">
-  <path d="M58 50 12 82 13 90 57 86Z" fill="url(#paintWingL)"/>
-  <path d="M102 50 148 82 147 90 103 86Z" fill="url(#paintWingR)"/>
-  <path d="M57 92 36 104 37 110 58 106Z" fill="url(#paintWingL)"/>
-  <path d="M103 92 124 104 123 110 102 106Z" fill="url(#paintWingR)"/>
+<!-- Cranked-kite blended wing, tailless -->
+<g filter="url(#hull)">
+  <path d="M71 43 14 80 8 84 9 90 38 92 46 99 60 100 67 62Z" fill="url(#wingL)"/>
+  <path d="M89 43 146 80 152 84 151 90 122 92 114 99 100 100 93 62Z" fill="url(#wingR)"/>
+  <path d="M73 28 56 38 56.5 41.5 72.4 37Z" fill="url(#wingL)"/>
+  <path d="M87 28 104 38 103.5 41.5 87.6 37Z" fill="url(#wingR)"/>
+  <path d="M74 27 72.4 37 70.6 43.4 72.9 43.6 74.3 32Z" fill="url(#wingL)"/>
+  <path d="M86 27 87.6 37 89.4 43.4 87.1 43.6 85.7 32Z" fill="url(#wingR)"/>
 </g>
-<g fill="none" stroke-linejoin="round">
-  <path d="M55 53 15 80.5 M105 53 145 80.5" stroke="#dfe6e8" stroke-width=".7" opacity=".55"/>
-  <path d="M24 86.8 55 84 M136 86.8 105 84 M40 85.5 38.5 76 M120 85.5 121.5 76 M50 84.6 49 69.5 M110 84.6 111 69.5" stroke="#2c353c" stroke-width=".55" opacity=".6"/>
-  <path d="M24.6 87.4 55.4 84.6 M135.4 87.4 104.6 84.6" stroke="#c9d1d4" stroke-width=".4" opacity=".45"/>
-  <path d="M30 76 44 67 M130 76 116 67 M44 101 55 95 M116 101 105 95" stroke="#2c353c" stroke-width=".45" opacity=".5"/>
-</g>
-
-<!-- Wingtip rails with short-range missiles -->
-<g>
-  <path d="M11.2 66h2.6v26h-2.6Z M146.2 66h2.6v26h-2.6Z" fill="url(#missile)"/>
-  <path d="M11.2 66q1.3-4 2.6 0Z M146.2 66q1.3-4 2.6 0Z" fill="#3b4247"/>
-  <path d="M9 88l2.2-2v6Z M16 88l-2.2-2v6Z M144 88l2.2-2v6Z M151 88l-2.2-2v6Z M9.6 71l1.6-1.4v3.4Z M15.4 71l-1.6-1.4v3.4Z M144.6 71l1.6-1.4v3.4Z M150.4 71l-1.6-1.4v3.4Z" fill="#6c7378"/>
-  <path d="M11.2 74.5h2.6 M146.2 74.5h2.6" stroke="#c9a23a" stroke-width=".9"/>
-</g>
-
-<!-- Engine nacelles -->
-<g filter="url(#bevel)">
-  <path d="M57.4 47C56.5 62 56.5 90 57.4 106L58 113.5h14L72.6 106 73 46Z" fill="url(#nacelle)"/>
-  <path d="M102.6 47C103.5 62 103.5 90 102.6 106L102 113.5H88L87.4 106 87 46Z" fill="url(#nacelle)"/>
-</g>
-<g>
-  <path d="M57.4 104.5h15.2l-.9 9h-13.4Z M87.4 104.5h15.2l-.9 9h-13.4Z" fill="url(#petals)"/>
-  <path d="M60.5 104.5v9 M63.5 104.5v9 M66.5 104.5v9 M69.5 104.5v9 M90.5 104.5v9 M93.5 104.5v9 M96.5 104.5v9 M99.5 104.5v9" stroke="#1d2024" stroke-width=".45" opacity=".7"/>
-  <path d="M57.4 104.5h15.2 M87.4 104.5h15.2" stroke="#2a2723" stroke-width="1.1"/>
-  <ellipse cx="65" cy="113.4" rx="6.4" ry="1.6" fill="url(#nozzle)"/>
-  <ellipse cx="95" cy="113.4" rx="6.4" ry="1.6" fill="url(#nozzle)"/>
-  <path d="M59 99h12 M89 99h12" stroke="#5b4a3f" stroke-width="3" opacity=".35"/>
-</g>
-
-<!-- Canted twin vertical stabilisers -->
-<g filter="url(#bevel)">
-  <path d="M67 75 60.2 91.5 58.2 102.6 66 101Z" fill="#7d8992"/>
-  <path d="M93 75 99.8 91.5 101.8 102.6 94 101Z" fill="#5d6973"/>
-</g>
-<path d="M66.2 78 60.9 91.6 M93.8 78 99.1 91.6 M65.6 96.5 59.4 98 M94.4 96.5 100.6 98" stroke="#d3dadd" stroke-width=".45" opacity=".55"/>
-<path d="M58.8 101.8 59.6 99.4 M101.2 101.8 100.4 99.4" stroke="#e4473f" stroke-width="1.1" filter="url(#glow)"/>
-
-<!-- Intake ramps -->
-<path d="M56.6 50.5 66 44.6 67.8 53 57.8 56.4Z M103.4 50.5 94 44.6 92.2 53 102.2 56.4Z" fill="#1a2025"/>
-<path d="M57.3 51 66 45.6 M102.7 51 94 45.6" stroke="#b9c3c8" stroke-width=".7"/>
-<path d="M58.4 55.2 67 52.4 M101.6 55.2 93 52.4" stroke="#39434a" stroke-width=".6"/>
-
-<!-- Centre fuselage and spine -->
-<path d="M80 3C76.5 9 73 20 71 33L66 46 73 56 74 98 77 106h6l3-8 1-42 7-10-5-13C87 20 83.5 9 80 3Z" fill="url(#fuselage)" filter="url(#bevel)"/>
-<path d="M80 3C78.3 6 76.9 9.6 75.8 13.2 78.5 14.3 81.5 14.3 84.2 13.2 83.1 9.6 81.7 6 80 3Z" fill="url(#radome)"/>
-<path d="M75.8 13.2Q80 14.8 84.2 13.2" stroke="#2c353c" stroke-width=".5" fill="none"/>
+<!-- Radar-absorbent tile field and thin-film shimmer -->
+<path d="M71 43 14 80 8 84 9 90 38 92 46 99 60 100 67 62Z M89 43 146 80 152 84 151 90 122 92 114 99 100 100 93 62Z" fill="url(#film)" opacity=".13"/>
+<!-- Graphite leading edges and elevons -->
+<path d="M71 43 14 80 8 84 10 84.6 15.4 81.2 71.6 44.6Z M89 43 146 80 152 84 150 84.6 144.6 81.2 88.4 44.6Z" fill="url(#graphite)"/>
+<path d="M9 90 38 92 46 99 47 97.3 38.8 90.3 9.4 88.2Z M151 90 122 92 114 99 113 97.3 121.2 90.3 150.6 88.2Z" fill="#434c55" opacity=".85"/>
 <g fill="none" stroke-linecap="round">
-  <path d="M71 33 66 46 M89 33 94 46" stroke="#e7ecee" stroke-width=".6" opacity=".7"/>
-  <path d="M76 44 76 98 M84 44 84 98 M74.5 60h11 M74.5 74h11 M74.8 88h10.4" stroke="#2c353c" stroke-width=".5" opacity=".55"/>
-  <path d="M76.5 44.5 76.5 97.5" stroke="#dde3e5" stroke-width=".35" opacity=".5"/>
-  <path d="M77.5 64h5v7h-5Z M78 80h4v5h-4Z" stroke="#2c353c" stroke-width=".45" opacity=".55"/>
+  <path d="M9.4 88.2 38.8 90.3 47 97.3 M150.6 88.2 121.2 90.3 113 97.3 M20 88.9 20.6 91 M30 89.6 30.4 91.5 M140 88.9 139.4 91 M130 89.6 129.6 91.5" stroke="#1b2127" stroke-width=".55" opacity=".7"/>
+  <path d="M61 60 38 75 M99 60 122 75 M45 71 52 85 M115 71 108 85 M33 78 36 87 M127 78 124 87" stroke="#2b343c" stroke-width=".5" opacity=".55"/>
+  <path d="M61.6 61.2 38.6 76.2 M98.4 61.2 121.4 76.2" stroke="#fff" stroke-width=".4" opacity=".45"/>
+  <path d="M59 50 62 57 M101 50 98 57" stroke="#2b343c" stroke-width=".5" opacity=".5"/>
 </g>
-<g fill="#23292e" opacity=".75">
-  <circle cx="75.2" cy="50" r=".45"/><circle cx="84.8" cy="50" r=".45"/><circle cx="75.2" cy="67" r=".45"/><circle cx="84.8" cy="67" r=".45"/><circle cx="75.4" cy="84" r=".45"/><circle cx="84.6" cy="84" r=".45"/>
+<path d="M66 50 20 80 16 86 38 88.5 46 94 60 95 64 62Z M94 50 140 80 144 86 122 88.5 114 94 100 95 96 62Z" fill="url(#tiles)" opacity=".22"/>
+<path d="M65.6 64 43.6 90.4 47.2 94.6 59.6 95.6 63.4 72Z M94.4 64 116.4 90.4 112.8 94.6 100.4 95.6 96.6 72Z" fill="url(#graphite)" opacity=".82"/>
+<path d="M65.6 64 43.6 90.4 M94.4 64 116.4 90.4" stroke="#6fe6ff" stroke-width=".35" opacity=".5"/>
+<!-- Engine nacelles and 2D thrust-vectoring nozzles -->
+<g filter="url(#hull)">
+  <path d="M61.2 66C60.6 82 59.6 96 59 104V112H70.5L71.2 104C71.2 94 70.6 80 69.6 66Z" fill="url(#nacelle)"/>
+  <path d="M98.8 66C99.4 82 100.4 96 101 104V112H89.5L88.8 104C88.8 94 89.4 80 90.4 66Z" fill="url(#nacelle)"/>
 </g>
-
-<!-- Gold-tinted bubble canopy with frame and cockpit shadows -->
-<path d="M80 14.2C84.8 17.5 86.4 26.5 86 35 85.6 39.5 83 42.2 80 42.2S74.4 39.5 74 35C73.6 26.5 75.2 17.5 80 14.2Z" fill="#1a1f23"/>
-<path d="M80 15C84.3 18 85.6 26.5 85.3 34.6 85 38.8 82.7 41.3 80 41.3S75 38.8 74.7 34.6C74.4 26.5 75.7 18 80 15Z" fill="url(#canopy)"/>
-<path d="M75.3 30.3Q80 28.4 84.7 30.3" stroke="#262a2c" stroke-width="1.1" fill="none"/>
-<path d="M76.7 22.5C77.6 19.6 78.6 17.9 80 16.9 79.2 19.8 78.6 23.3 78.3 27.2 77.4 26.3 76.8 24.8 76.7 22.5Z" fill="#fffbe6" opacity=".78"/>
-<path d="M81.9 33.2C83 34.2 83.5 36.3 83 38.3" stroke="#fff5d6" stroke-width=".7" fill="none" opacity=".55"/>
-
-<!-- Markings and lights -->
-<g opacity=".82">
-  <circle cx="33" cy="80" r="3.1" fill="#56626b"/><circle cx="33" cy="80" r="1.9" fill="#8a959c"/><circle cx="33" cy="80" r=".8" fill="#56626b"/>
-  <circle cx="127" cy="80" r="3.1" fill="#4c5861"/><circle cx="127" cy="80" r="1.9" fill="#7c878f"/><circle cx="127" cy="80" r=".8" fill="#4c5861"/>
-</g>
-<path d="M44.4 77.5h2.6l-1 2.8h-2.6Z M113 77.5h2.6l1 2.8h-2.6Z" fill="#c8513e" opacity=".85"/>
-<text x="80" y="95.5" font-family="Arial Narrow,Arial,sans-serif" font-size="4.2" font-weight="700" text-anchor="middle" fill="#3b464e" opacity=".8">07</text>
+<path d="M59 104H71.2L70.5 112H59Z M89.5 104H101V112H89.5Z" fill="url(#nozzle)"/>
+<path d="M61.8 104V112 M64.9 104V112 M67.9 104V112 M92.1 104V112 M95.1 104V112 M98.2 104V112" stroke="#11151a" stroke-width=".45" opacity=".75"/>
+<path d="M59.2 104.4H71 M89.7 104.4H100.8" stroke="#c9d2d8" stroke-width=".5" opacity=".6"/>
 <g filter="url(#glow)">
-  <circle cx="13.4" cy="84" r="1" fill="#ff5a4a"/>
-  <circle cx="146.6" cy="84" r="1" fill="#6dffa0"/>
-  <circle cx="80" cy="47.5" r=".65" fill="#ffe2a0"/>
+  <rect x="60.6" y="110.3" width="8.6" height="1.7" rx=".8" fill="#7fe8ff"/>
+  <rect x="90.8" y="110.3" width="8.6" height="1.7" rx=".8" fill="#7fe8ff"/>
+</g>
+<path d="M61.8 110.9h6.2 M92 110.9h6.2" stroke="#f2ffff" stroke-width=".6"/>
+
+<!-- Blended fuselage -->
+<path d="M80 3C77 8 75.5 14 74.5 22L72.2 40 68.6 62 66 98 72 104 80 107 88 104 94 98 91.4 62 87.8 40 85.5 22C84.5 14 83 8 80 3Z" fill="url(#body)" filter="url(#hull)"/>
+<path d="M80 3C77 8 75.5 14 74.5 22L72.2 40 68.6 62 66 98 72 104 80 107 88 104 94 98 91.4 62 87.8 40 85.5 22C84.5 14 83 8 80 3Z" fill="url(#film)" opacity=".08"/>
+<g fill="none" stroke-linecap="round">
+  <path d="M74.6 46h10.8 M72.6 60h14.8 M70.4 80h19.2 M69.6 92h20.8 M75.6 22 78 24 M84.4 22 82 24" stroke="#2b343c" stroke-width=".5" opacity=".55"/>
+  <path d="M71 70 69 94 M89 70 91 94" stroke="#2b343c" stroke-width=".5" opacity=".45"/>
+  <path d="M73.4 48 71.6 62" stroke="#fff" stroke-width=".45" opacity=".55"/>
+</g>
+<!-- Weapon bay doors -->
+<path d="M74.6 64h4.4v14h-4.4Z M81 64h4.4v14H81Z" fill="#8d98a0" opacity=".35" stroke="#2b343c" stroke-width=".45"/>
+
+<!-- Flush dorsal intakes -->
+<path d="M71.4 45.4 74.4 44.9 73.9 53.6 70.5 54.4Z M88.6 45.4 85.6 44.9 86.1 53.6 89.5 54.4Z" fill="url(#graphite)"/>
+<path d="M71.9 46.4 73.9 46 73.5 52.4 71.1 53Z M88.1 46.4 86.1 46 86.5 52.4 88.9 53Z" fill="#0b0f13"/>
+<path d="M71.4 45.4 74.4 44.9 M88.6 45.4 85.6 44.9" stroke="#e6ecef" stroke-width=".55"/>
+
+<!-- Frameless electrochromic canopy -->
+<path d="M80 13C77.2 16 76.3 22 76.5 30 76.7 36 78 40 80 42 82 40 83.3 36 83.5 30 83.7 22 82.8 16 80 13Z" fill="#11181f"/>
+<path d="M80 14C77.7 17 77 22.4 77.2 30 77.4 35.4 78.4 39 80 40.8 81.6 39 82.6 35.4 82.8 30 83 22.4 82.3 17 80 14Z" fill="url(#canopy)"/>
+<path d="M78.3 18.5C77.8 22 77.8 27 78.2 31" stroke="#eaf8ff" stroke-width=".8" fill="none" opacity=".75" stroke-linecap="round"/>
+<path d="M81.6 33 81 37.5" stroke="#ffe0a3" stroke-width=".5" opacity=".6"/>
+
+<!-- Nose electro-optical aperture -->
+<path d="M80 7.2 81.3 9.4 80 11.2 78.7 9.4Z" fill="#0b1117"/>
+<circle cx="79.8" cy="9.3" r=".55" fill="#9ff0ff"/>
+
+<!-- Dorsal spine with directed-energy turret -->
+<path d="M78.2 44h3.6l.9 26-2.7 5-2.7-5Z" fill="#dfe5e8" opacity=".5"/>
+<circle cx="80" cy="54" r="3.4" fill="url(#graphite)"/>
+<circle cx="80" cy="54" r="2.1" fill="url(#lens)"/>
+<circle cx="79.3" cy="53.3" r=".5" fill="#fff"/>
+
+<!-- Friendly insignia -->
+<g opacity=".85">
+  <path d="M36 74 42 70.4 48 74 42 72.2Z M112 74 118 70.4 124 74 118 72.2Z" fill="#1f6f86"/>
+  <path d="M36 76.4 42 72.8 48 76.4 42 74.6Z M112 76.4 118 72.8 124 76.4 118 74.6Z" fill="#e0a64d"/>
 </g>
 
-<use href="#airframe" xlink:href="#airframe" filter="url(#grime)" opacity=".55"/>
+<!-- Cyan formation light strips and nav lights -->
+<g filter="url(#glow)" stroke-linecap="round">
+  <path d="M67.8 47.6 52 58 M92.2 47.6 108 58 M76.2 19 74.4 30 M83.8 19 85.6 30" stroke="#6fe6ff" stroke-width=".7"/>
+  <circle cx="10" cy="86.5" r="1.1" fill="#ff4d4d"/>
+  <circle cx="150" cy="86.5" r="1.1" fill="#53ffa4"/>
+  <circle cx="80" cy="96" r=".9" fill="#ffc46b"/>
+</g>
+
+<use href="#airframe" xlink:href="#airframe" filter="url(#wear)" opacity=".28"/>
 </svg>

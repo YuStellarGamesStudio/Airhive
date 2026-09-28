@@ -191,9 +191,9 @@ export class Renderer {
     const pulse = 0.8 + Math.sin(this.elapsed * TAU * V.flamePulseHz) * 0.18;
     const nozzleY = player.y + player.h * 0.42;
     const flame = ctx.createLinearGradient(0, nozzleY, 0, nozzleY + 33);
-    flame.addColorStop(0, 'rgba(255,249,212,.98)');
-    flame.addColorStop(0.34, 'rgba(107,211,240,.88)');
-    flame.addColorStop(1, 'rgba(250,129,71,0)');
+    flame.addColorStop(0, 'rgba(244,253,255,.98)');
+    flame.addColorStop(0.34, 'rgba(107,221,248,.88)');
+    flame.addColorStop(1, 'rgba(96,108,255,0)');
     ctx.fillStyle = flame;
     for (const offset of [-player.w * 0.095, player.w * 0.095]) {
       ctx.beginPath();
@@ -221,7 +221,7 @@ export class Renderer {
     const ux = vx / speed, uy = vy / speed;
     const x = shot.x, y = shot.y;
     if (kind === 'missile') {
-      ctx.strokeStyle = 'rgba(255,163,91,.55)';
+      ctx.strokeStyle = 'rgba(120,226,255,.5)';
       ctx.lineWidth = 4;
       ctx.beginPath();
       ctx.moveTo(x - ux * 10, y - uy * 10);
@@ -230,15 +230,15 @@ export class Renderer {
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(Math.atan2(vy, vx) + Math.PI / 2);
-      ctx.fillStyle = '#e9d5b0';
-      ctx.strokeStyle = '#396779';
+      ctx.fillStyle = '#dfe6ea';
+      ctx.strokeStyle = '#2a3a46';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(0, -11); ctx.lineTo(5, -2); ctx.lineTo(4, 7);
       ctx.lineTo(8, 10); ctx.lineTo(3, 9); ctx.lineTo(-3, 9);
       ctx.lineTo(-8, 10); ctx.lineTo(-4, 7); ctx.lineTo(-5, -2);
       ctx.closePath(); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#f3915a';
+      ctx.fillStyle = '#7fe8ff';
       ctx.fillRect(-2, 8, 4, 4);
       ctx.restore();
     } else if (kind === 'rapid') {
@@ -313,14 +313,14 @@ export class Renderer {
       }
       if (enemy && (shot.kind === 'mine' || shot.kind === 'bomb')) {
         const radius = Math.max(5, Math.min(shot.w / 2, 16));
-        ctx.fillStyle = shot.kind === 'mine' ? '#963f48' : '#ad6650';
-        ctx.strokeStyle = '#f5bc8e';
+        ctx.fillStyle = shot.kind === 'mine' ? '#2b2e35' : '#3a3431';
+        ctx.strokeStyle = shot.kind === 'mine' ? '#ff6a4a' : '#ffb35c';
         ctx.lineWidth = 2;
         ctx.beginPath();ctx.arc(shot.x, shot.y, radius, 0, TAU);ctx.fill();ctx.stroke();
-        ctx.fillStyle = '#ffe5a4';
-        ctx.beginPath();ctx.arc(shot.x - radius / 4, shot.y - radius / 4, radius / 4, 0, TAU);ctx.fill();
+        ctx.fillStyle = shot.kind === 'mine' ? '#ffb08a' : '#ffe2a4';
+        ctx.beginPath();ctx.arc(shot.x, shot.y, radius / 3, 0, TAU);ctx.fill();
         if (shot.kind === 'mine') {
-          ctx.strokeStyle = '#dca59a';
+          ctx.strokeStyle = '#c9ced6';
           for (let i = 0; i < 8; i++) {
             const angle = i * TAU / 8;
             ctx.beginPath();

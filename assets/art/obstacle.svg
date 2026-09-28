@@ -1,52 +1,116 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" height="90" viewBox="0 0 100 90">
 <defs>
-  <filter id="bevel" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+  <filter id="hull" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
     <feGaussianBlur in="SourceAlpha" stdDeviation="1.1" result="height"/>
-    <feDiffuseLighting in="height" surfaceScale="2.6" diffuseConstant="1.18" lighting-color="#fff" result="diffuse"><feDistantLight azimuth="225" elevation="52"/></feDiffuseLighting>
-    <feSpecularLighting in="height" surfaceScale="2.6" specularConstant=".75" specularExponent="18" lighting-color="#fff4df" result="specular"><feDistantLight azimuth="225" elevation="44"/></feSpecularLighting>
+    <feDiffuseLighting in="height" surfaceScale="2.4" diffuseConstant="1.18" lighting-color="#fff" result="diffuse"><feDistantLight azimuth="225" elevation="54"/></feDiffuseLighting>
+    <feSpecularLighting in="height" surfaceScale="2.4" specularConstant=".9" specularExponent="26" lighting-color="#f4f9ff" result="specular"><feDistantLight azimuth="225" elevation="40"/></feSpecularLighting>
     <feComposite in="SourceGraphic" in2="diffuse" operator="arithmetic" k1="1" result="lit"/>
     <feComposite in="specular" in2="SourceAlpha" operator="in" result="gloss"/>
-    <feComposite in="gloss" in2="lit" operator="arithmetic" k2=".38" k3="1" result="shaded"/>
+    <feComposite in="gloss" in2="lit" operator="arithmetic" k2=".4" k3="1" result="shaded"/>
     <feComposite in="shaded" in2="SourceAlpha" operator="in"/>
   </filter>
-  <filter id="grime" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-    <feTurbulence type="fractalNoise" baseFrequency=".07 .12" numOctaves="3" seed="23" result="mottle"/>
-    <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="5" result="grain"/>
-    <feComposite in="mottle" in2="grain" operator="arithmetic" k2=".7" k3=".3"/>
-    <feColorMatrix type="matrix" values="0 0 0 0 .1  0 0 0 0 .07  0 0 0 0 .05  -1.6 0 0 0 1.05"/>
+  <filter id="wear" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency=".09 .14" numOctaves="3" seed="41" result="mottle"/>
+    <feTurbulence type="fractalNoise" baseFrequency="1.5" numOctaves="2" seed="12" result="grain"/>
+    <feComposite in="mottle" in2="grain" operator="arithmetic" k2=".75" k3=".25"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 .07  0 0 0 0 .05  0 0 0 0 .04  -1.8 0 0 0 1.1"/>
     <feComposite in2="SourceAlpha" operator="in"/>
   </filter>
-  <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feGaussianBlur in="SourceAlpha" stdDeviation="2.2"/><feOffset dx="2.5" dy="4.5" result="blur"/><feFlood flood-color="#02070d" flood-opacity=".5"/><feComposite in2="blur" operator="in"/></filter>
-  <filter id="glow" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="1.5" result="halo"/><feMerge><feMergeNode in="halo"/><feMergeNode in="halo"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-  <linearGradient id="shell" x1="0" x2="1"><stop stop-color="#333d42"/><stop offset=".21" stop-color="#899293"/><stop offset=".37" stop-color="#bbc0b8"/><stop offset=".58" stop-color="#7b8588"/><stop offset=".8" stop-color="#464e51"/><stop offset="1" stop-color="#252a2d"/></linearGradient>
-  <linearGradient id="spar" x1="0" y1="0" x2=".6" y2="1"><stop stop-color="#c9c4af"/><stop offset=".24" stop-color="#828b8b"/><stop offset=".65" stop-color="#444a4c"/><stop offset="1" stop-color="#242629"/></linearGradient>
-  <linearGradient id="tear" x1="0" x2="1"><stop stop-color="#986e50"/><stop offset=".26" stop-color="#e1c6a0"/><stop offset=".53" stop-color="#696764"/><stop offset="1" stop-color="#2b2b29"/></linearGradient>
-  <radialGradient id="char"><stop stop-color="#141414" stop-opacity=".9"/><stop offset=".57" stop-color="#262321" stop-opacity=".73"/><stop offset="1" stop-color="#383330" stop-opacity="0"/></radialGradient>
-  <g id="airframe"><path d="M3 31 21 22 43 27 51 7 61 8 64 24 79 16 94 22 80 44 97 62 90 70 69 61 56 84 44 78 37 61 15 71 6 66 22 46Z"/></g>
+  <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+    <feOffset dx="2" dy="4" result="blur"/>
+    <feFlood flood-color="#01050b" flood-opacity=".5"/>
+    <feComposite in2="blur" operator="in"/>
+  </filter>
+  <filter id="glow" x="-200%" y="-200%" width="500%" height="500%">
+    <feGaussianBlur stdDeviation="1.1" result="halo"/>
+    <feMerge><feMergeNode in="halo"/><feMergeNode in="halo"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <!-- Cylinder shading runs across the module's short axis -->
+  <linearGradient id="module" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#8e9296"/><stop offset=".22" stop-color="#d6d8d6"/><stop offset=".4" stop-color="#eceae4"/><stop offset=".7" stop-color="#9c9c98"/><stop offset="1" stop-color="#4e5154"/>
+  </linearGradient>
+  <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#f6d98a"/><stop offset=".3" stop-color="#b9862f"/><stop offset=".55" stop-color="#e9c46a"/><stop offset=".8" stop-color="#8a5f22"/><stop offset="1" stop-color="#d7ad55"/>
+  </linearGradient>
+  <linearGradient id="interior" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#1c1a19"/><stop offset=".5" stop-color="#0b0a0a"/><stop offset="1" stop-color="#231c18"/>
+  </linearGradient>
+  <linearGradient id="cells" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#3a5d8f"/><stop offset=".35" stop-color="#16294a"/><stop offset=".6" stop-color="#274a7a"/><stop offset="1" stop-color="#0c1a30"/>
+  </linearGradient>
+  <linearGradient id="hatch" x1="0" x2="1">
+    <stop offset="0" stop-color="#5a5e62"/><stop offset=".4" stop-color="#b7babb"/><stop offset="1" stop-color="#3d4044"/>
+  </linearGradient>
+  <pattern id="grid" width="3.2" height="3.2" patternUnits="userSpaceOnUse">
+    <path d="M0 0H3.2M0 0V3.2" fill="none" stroke="#9fb6d6" stroke-width=".25" opacity=".55"/>
+  </pattern>
+  <filter id="drop" x="-10%" y="-10%" width="125%" height="130%" color-interpolation-filters="sRGB">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="1.8"/>
+    <feOffset dx="2" dy="3.5" result="blur"/>
+    <feFlood flood-color="#01050b" flood-opacity=".5"/>
+    <feComposite in2="blur" operator="in" result="shade"/>
+    <feMerge><feMergeNode in="shade"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
 </defs>
-<use href="#airframe" xlink:href="#airframe" filter="url(#shadow)"/>
-<!-- Broken wing spar, dangling split ribs and torn sheet metal -->
-<path d="M4 31 23 23 44 32 32 43 9 43Z M23 46 47 47 38 61 15 71 6 66Z" fill="url(#spar)" filter="url(#bevel)"/>
-<path d="M13 32 39 38 50 40 72 27 94 22 79 43 96 62 90 70 66 56 46 54 22 49Z" fill="#353c3e"/>
-<path d="M10 34 32 41 47 42 78 20 88 24 70 39 47 49 23 45Z" fill="url(#tear)" filter="url(#bevel)"/>
-<path d="M22 28 20 48 12 63 M30 34l-7 14 12 12 M40 39l-10 15 M72 27l-17 21 30 17 M75 39l16 24" stroke="#24292a" stroke-width="3" fill="none"/>
-<path d="M22 28 20 48 12 63 M30 34l-7 14 12 12 M40 39l-10 15 M72 27l-17 21 30 17 M75 39l16 24" stroke="#9ba09b" stroke-width=".9" fill="none" opacity=".72"/>
-<!-- Open, jagged barrel-like fuselage section -->
-<path d="M42 12 51 7 61 8 65 20 68 30 76 38 70 52 60 63 55 83 44 78 39 60 32 49 34 31Z" fill="url(#shell)" filter="url(#bevel)"/>
-<path d="M44 12 51 7 61 8 65 20 60 22 47 21Z" fill="#383b3a"/>
-<path d="M45 11Q53 7 61 10l3 10q-11-5-17 1Z" fill="url(#tear)"/>
-<path d="M45 14q9-4 16-2 M43 18q9-3 19 0" fill="none" stroke="#292c2d" stroke-width="1.5"/>
-<path d="M46 23 55 22 65 27 70 38 66 51 58 66 55 77 46 73 42 58 37 45 39 33Z" fill="url(#shell)"/>
-<path d="M37 45 46 49 44 58 38 59 35 52Z M62 62l-7 14 4 8 8-18 7-6Z" fill="url(#tear)" filter="url(#bevel)"/>
-<path d="M44 58 49 64 47 74 55 77l4-10 5-7" stroke="#292b2b" stroke-width="2" fill="none"/>
-<path d="M42 30 52 27 63 31 M38 44l10 4 12-1 M46 64l10 3" stroke="#222a2d" stroke-width=".8" fill="none" opacity=".72"/>
-<path d="M43 31q7-3 12-3 M39 45l7 3 M47 65l7 3" stroke="#d8d5c5" stroke-width=".65" fill="none" opacity=".5"/>
-<path d="M19 43 35 47 M57 25l11 10 M42 62l-21 7 M73 41l17 20" stroke="#202527" stroke-width=".8" fill="none" stroke-dasharray="3 2"/>
-<ellipse cx="55" cy="46" rx="18" ry="16" fill="url(#char)"/>
-<path d="M51 35q8 1 11 10m-12 9q4 3 8 2" stroke="#383331" stroke-width="2.5" fill="none" opacity=".7"/>
-<path d="M25 25l18 6 M19 55l17-5 M68 29l11-11 M80 43l14 18" stroke="#b1a695" stroke-width=".8" fill="none" opacity=".53"/>
-<path d="M49 58q-5 2-2 10m14-23q7-2 9 3" stroke="#6c4833" stroke-width="1" fill="none"/>
-<g fill="#d9864e" filter="url(#glow)"><circle cx="46" cy="57" r="1.1"/><circle cx="64" cy="48" r=".85"/><circle cx="39" cy="66" r=".65"/></g>
-<path d="M45 57l-3-5m23-4 4-4 M39 65l-3 4" fill="none" stroke="#f1b179" stroke-width=".6"/>
-<use href="#airframe" xlink:href="#airframe" filter="url(#grime)" opacity=".48"/>
+
+<g filter="url(#drop)">
+
+<!-- Shattered photovoltaic wing on a bent boom (upper left) -->
+<g transform="rotate(-24 26 22)">
+  <path d="M6 14H40V32H22L17 27 12 32H6Z" fill="url(#cells)"/>
+  <path d="M6 14H40V32H22L17 27 12 32H6Z" fill="url(#grid)"/>
+  <path d="M6 14H40V32H6Z" fill="none" stroke="#5e6468" stroke-width=".9"/>
+  <path d="M23 14V32 M6 23H40" stroke="#6b7278" stroke-width=".6"/>
+  <path d="M29 18.5 31.5 22.4 30.4 27 M31.5 22.4 36 21" fill="none" stroke="#c9d8ea" stroke-width=".3" opacity=".5"/>
+  <path d="M8 16 20 16" stroke="#e8f1ff" stroke-width=".7" opacity=".4"/>
+</g>
+<path d="M36 22 44 30 51 33" fill="none" stroke="#3b3e42" stroke-width="2.6" stroke-linecap="round"/>
+<path d="M36 21.2 44 29.2 51 32.2" fill="none" stroke="#a4a8ab" stroke-width=".7"/>
+
+<!-- Pressurized module section, tumbling -->
+<g transform="rotate(-20 50 47)">
+  <g filter="url(#hull)">
+    <path d="M14 34H66L69 35.2 67.8 37.4 71 38.6 69.4 41 72.6 43.2 70.2 45.6 73 48.4 69.8 50.2 72.2 53.6 68.6 55.4 70.4 58.2 67 60H14Q10 47 14 34Z" fill="url(#module)"/>
+    <ellipse cx="14.5" cy="47" rx="4.5" ry="13" fill="url(#hatch)"/>
+  </g>
+  <path d="M14 34H66L69 35.2 67.8 37.4 71 38.6 69.4 41 72.6 43.2 70.2 45.6 73 48.4 69.8 50.2 72.2 53.6 68.6 55.4 70.4 58.2 67 60H14Q10 47 14 34Z" filter="url(#wear)" opacity=".35"/>
+  <!-- Gold multilayer-insulation blankets -->
+  <path d="M28 34.6H44V59.4H28Z" fill="url(#foil)" opacity=".92"/>
+  <path d="M30 36 33 40 31 45 34 50 31 56 M38 35.5 41 42 38 49 42 57" fill="none" stroke="#6a4412" stroke-width=".4" opacity=".32"/>
+  <path d="M29 38 43 37 M29 53 43 52" stroke="#fff3c4" stroke-width=".5" opacity=".55"/>
+  <!-- Ring frames and panel seams -->
+  <path d="M24 34.4V59.6 M48 34.4V59.6 M58 34.4V59.6 M14 40.5H70 M14 53.5H70" fill="none" stroke="#2b2d30" stroke-width=".55" opacity=".6"/>
+  <path d="M24.6 35V59 M48.6 35V59" stroke="#fff" stroke-width=".35" opacity=".4"/>
+  <circle cx="14.5" cy="47" r="3.2" fill="#2c2f33"/>
+  <circle cx="14.5" cy="47" r="1.8" fill="#15171a"/>
+  <path d="M12.6 36.8 16.4 36.8 M12.6 57.2 16.4 57.2" stroke="#e3e6e8" stroke-width=".6" opacity=".6"/>
+  <!-- Torn end: exposed interior, ribs, hot rims -->
+  <path d="M67.4 36.4 69.6 38.8 68.4 41.6 71 43.6 69 46 71.4 48.6 68.8 50.8 70.8 53.8 67.8 55.8 68.8 58.4 66.2 58.8Q63.6 47 67.4 36.4Z" fill="url(#interior)"/>
+  <path d="M67.8 39.4Q66.2 47 67.6 55.4" fill="none" stroke="#5d5752" stroke-width=".6"/>
+  <path d="M66 60 67 58.4 M65.4 34 66.6 35.6" stroke="#15171a" stroke-width=".6"/>
+  <g fill="none" stroke="#ff9a4d" stroke-linejoin="round" filter="url(#glow)" opacity=".85">
+    <path d="M69 35.2 67.8 37.4 71 38.6 69.4 41 72.6 43.2 70.2 45.6 73 48.4 69.8 50.2 72.2 53.6 68.6 55.4 70.4 58.2" stroke-width=".45"/>
+  </g>
+  <!-- Exposed conduits spilling from the tear -->
+  <path d="M72 47Q80 45 84 50 M73 50Q79 54 82 60 M71 42Q78 37 84 38" fill="none" stroke="#2a2c30" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M72 47Q80 45 84 50 M71 42Q78 37 84 38" fill="none" stroke="#c7482d" stroke-width=".5" opacity=".8"/>
+  <path d="M73 50Q79 54 82 60" fill="none" stroke="#3aa0c8" stroke-width=".5" opacity=".8"/>
+</g>
+
+<!-- Bent truss girder trailing below -->
+<g fill="none" stroke-linecap="round">
+  <path d="M40 66 58 70 74 80 M42 72 59 75 72 85" stroke="#3a3d41" stroke-width="1.6"/>
+  <path d="M40 66 42 72 M46 67.3 47 73.2 43 72.2 M52 68.6 53 74.2 47 73.2 M58 70 59 75 53 74.2 M64 73.7 64 78.3 59 75 M70 77.5 69 81.8 64 78.3" stroke="#56595d" stroke-width=".8"/>
+  <path d="M40 65.3 58 69.3 74 79.3" stroke="#b6b9bb" stroke-width=".45" opacity=".6"/>
+</g>
+
+<!-- Embers and hot fragments -->
+<g filter="url(#glow)">
+  <circle cx="90" cy="30" r=".9" fill="#ffb25e"/>
+  <circle cx="86" cy="58" r=".7" fill="#ff8a3d"/>
+  <circle cx="93" cy="44" r=".55" fill="#ffd28a"/>
+  <path d="M80 70 82.5 69 82 71.5Z" fill="#ff7a38"/>
+</g>
+</g>
 </svg>
