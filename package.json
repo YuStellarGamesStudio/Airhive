@@ -1,0 +1,15 @@
+{
+  "name": "airhive",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0",
+  "description": "An offline-ready FM air-combat arcade game",
+  "scripts": {
+    "dev": "node tools/serve.mjs",
+    "test": "node --test",
+    "assets:hash": "node tools/hash-assets.mjs",
+    "assets:check": "node tools/hash-assets.mjs --check"
+  },
+  "engines": { "node": ">=22" }
+}
