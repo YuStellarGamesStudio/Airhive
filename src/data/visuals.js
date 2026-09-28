@@ -14,6 +14,7 @@ export const VISUALS = Object.freeze({
   cloudOpacityNear: 0.23,
   explosionParticles: 27,
   bossExplosionParticles: 100,
+  plasmaParticles: 10,
   hitParticles: 9,
   pickupParticles: 14,
   particleLife: 0.82,

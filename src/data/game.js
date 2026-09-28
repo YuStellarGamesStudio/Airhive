@@ -1,16 +1,44 @@
 // Logical units are pixels and seconds. Only the caller owns the fixed-step accumulator.
+const BULLET_SPEED = 900;
+const pattern = (offsets, angles = []) => Object.freeze(offsets.map((offset, i) => Object.freeze({
+  offset, vx: Math.sin(angles[i] ?? 0) * BULLET_SPEED,
+  vy: -Math.cos(angles[i] ?? 0) * BULLET_SPEED,
+})));
+const single = pattern([0]);
+const twin = pattern([-12, 12]);
+const triple = pattern([-17, 0, 17]);
+const spread = pattern([-25, -12, 0, 12, 25], [-0.34, -0.17, 0, 0.17, 0.34]);
+const nova = pattern([-36, -24, -12, 0, 12, 24, 36], [-0.42, -0.28, -0.14, 0, 0.14, 0.28, 0.42]);
+
+export const WEAPONS = Object.freeze([
+  { id: 'single', shots: single, interval: 0.125, damage: 1, kind: 'shot' },
+  { id: 'twin', shots: twin, interval: 0.125, damage: 1, kind: 'shot' },
+  { id: 'triple', shots: triple, interval: 0.125, damage: 1, kind: 'shot' },
+  { id: 'spread', shots: spread, interval: 0.125, damage: 1, kind: 'shot' },
+  { id: 'rapid', shots: spread, interval: 0.09, damage: 1, kind: 'rapid' },
+  { id: 'pierce', shots: spread, interval: 0.09, damage: 1, kind: 'pierce', pierce: 2 },
+  { id: 'guided', shots: spread, interval: 0.09, damage: 1, kind: 'pierce', pierce: 2,
+    missiles: 2, missileInterval: 0.6 },
+  { id: 'plasma', shots: spread, interval: 0.125, damage: 2, kind: 'plasma', pierce: 2,
+    missiles: 2, missileInterval: 0.55, splashRadius: 44, splashDamage: 1 },
+  { id: 'rail', shots: spread, interval: 0.1, damage: 2, kind: 'rail', pierce: 4,
+    missiles: 2, missileInterval: 0.5, splashRadius: 44, splashDamage: 1 },
+  { id: 'nova', shots: nova, interval: 0.09, damage: 2, kind: 'nova', pierce: 4,
+    missiles: 3, missileInterval: 0.4, splashRadius: 60, splashDamage: 2 },
+].map((weapon) => Object.freeze(weapon)));
+
 export const GAME = Object.freeze({
   width: 960, height: 540, step: 1 / 60, maxStepsPerUpdate: 8,
   player: { x: 480, y: 488, w: 54, h: 44, hp: 100, lives: 3, speed: 320, hitScale: 0.5,
-    fireInterval: 0.125, bulletSpeed: 900, bulletDamage: 1, homingInterval: 0.45,
+    bulletSpeed: BULLET_SPEED, homingInterval: 0.45, homingSpacing: 18,
     homingSpeed: 610, homingTurn: 4.5, slowFactor: 0.55, slowDuration: 2,
-    invulnerability: 1.6, reviveInvulnerability: 2.5, maxLevel: 4, bulletCap: 20,
-    volleyOffsets: [[0], [-12, 12], [-17, 0, 17]] },
+    invulnerability: 1.6, reviveInvulnerability: 2.5,
+    maxLevel: WEAPONS.length, bulletCap: 64 },
   enemyBulletCap: 60, enemyCap: 90, pickupCap: 16, obstacleCap: 3,
   enemyBulletSpeed: 250, enemyBulletSize: 10, enemyBulletLifetime: 5,
   enemyShotInterval: 3.2, enemyShotStagger: 0.85, enemyFireFloor: 1.25,
   enemySize: { w: 42, h: 36 }, bossSize: { w: 138, h: 92 },
-  enemyHpGrowth: 0.05, enemyHpCap: 3, enemySpeedGrowth: 0.03, enemySpeedCap: 1.8,
+  enemyHpGrowth: 0.075, enemyHpCap: 6, enemySpeedGrowth: 0.03, enemySpeedCap: 1.8,
   enemyAdvanceLimit: 320, obstacleSize: 50, playerShotSize: 9,
   wave: { minDuration: 13, duration: 26, gap: 2,
     banner: 2.2, spawnInterval: 0.3, initialDelay: 0.35, baseCount: 8, density: 2.25,
@@ -25,17 +53,16 @@ export const GAME = Object.freeze({
     obstacleRetry: 1,
     obstacleBaseSpeed: 92, obstacleHP: 3, obstacleScore: 50,
     bossSlowMotion: 0.6, bossSlowFactor: 0.35 },
-  comboCap: 99, bonusLifeScore: 50000, bonusLifeCap: 5, clearScore: 500,
+  comboCap: 99, bonusLifeScore: 250000, bonusLifeCap: 5, clearScore: 500,
   bombScoreFactor: 0.5, shotDensityEvery: 5,
   pickupSpeed: 92, pickupSize: 30, healAmount: 30,
   missileTurn: 2.4, missileSpeed: 205, mineLifetime: 6, mineSize: 21,
   bombBlastY: 508, bombBlastRadius: 70,
-  shotFan: [-0.34, -0.17, 0, 0.17, 0.34], shotOffsets: [-25, -12, 0, 12, 25],
   formationOffsets: { v: 26, arc: 8, stagger: 30, wings: 19, zigzag: 25 },
   obstacleLaneMargin: 55, obstacleLaneStart: 0.15, obstacleLaneSpan: 0.7,
   enemyTypeCount: 16, earlyTypeCount: 2, cycleBossCount: 8,
   pickupDropY: 220,
-  boss: { hpPerCycle: 8, hoverY: 112, hoverRange: 245,
+  boss: { hpPerCycle: 64, hoverY: 112, hoverRange: 245,
     hoverSpeed: 0.9, fireInterval: 1.05, spawnInterval: 5,
     dashInterval: 5, dashSpeed: 270,
     cloakInterval: 3.4, cloakDuration: 0.95,
@@ -74,14 +101,14 @@ export const ENEMIES = Object.freeze({
 });
 
 export const BOSSES = Object.freeze({
-  B1: { score: 3000, damage: 11, behavior: 'hive', hp: 64 },
-  B2: { score: 3500, damage: 14, behavior: 'crossfire', hp: 70 },
-  B3: { score: 4000, damage: 18, behavior: 'fortress', hp: 78 },
-  B4: { score: 4500, damage: 14, behavior: 'assassin', hp: 66 },
-  B5: { score: 4500, damage: 20, behavior: 'minefield', hp: 80 },
-  B6: { score: 5000, damage: 15, behavior: 'missiles', hp: 80 },
-  B7: { score: 5500, damage: 25, behavior: 'plasma', hp: 88 },
-  B8: { score: 8000, damage: 22, behavior: 'abyss', hp: 105 },
+  B1: { score: 3000, damage: 11, behavior: 'hive', hp: 128 },
+  B2: { score: 3500, damage: 14, behavior: 'crossfire', hp: 140 },
+  B3: { score: 4000, damage: 18, behavior: 'fortress', hp: 156 },
+  B4: { score: 4500, damage: 14, behavior: 'assassin', hp: 132 },
+  B5: { score: 4500, damage: 20, behavior: 'minefield', hp: 160 },
+  B6: { score: 5000, damage: 15, behavior: 'missiles', hp: 160 },
+  B7: { score: 5500, damage: 25, behavior: 'plasma', hp: 176 },
+  B8: { score: 8000, damage: 22, behavior: 'abyss', hp: 210 },
 });
 
 export const PICKUPS = Object.freeze(['power', 'homing', 'shield', 'bomb', 'life', 'heal']);

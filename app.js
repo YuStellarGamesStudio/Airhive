@@ -1,5 +1,5 @@
 import { Game } from './src/core/game.js';
-import { GAME } from './src/data/game.js';
+import { GAME, WEAPONS } from './src/data/game.js';
 import { UI, SAVE } from './src/data/settings.js';
 import { Renderer } from './src/render/renderer.js';
 import { AudioManager } from './src/audio/audio.js';
@@ -41,6 +41,8 @@ function persist() {
 function number(value) { return Math.floor(value).toLocaleString(i18n.language === 'zh' ? 'zh-TW' : i18n.language); }
 function clock(seconds) { return `${Math.floor(seconds / 60)}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`; }
 function setText(id, text) { if ($(id).textContent !== String(text)) $(id).textContent = text; }
+function weaponText() { return `L${game.player.level} · ${i18n.t(`weapon.${WEAPONS[game.player.level - 1].id}`)}`; }
+function pickupText() { return pickupKey === 'pickup.power' ? `${i18n.t(pickupKey)} · ${weaponText()}` : i18n.t(pickupKey); }
 function translate() {
   i18n.apply();
   $('language').value = i18n.language;
@@ -51,7 +53,7 @@ function translate() {
   document.querySelector('.toolbar').setAttribute('aria-label', `${i18n.t('language')} / ${i18n.t('sound')}`);
   document.querySelector('#system-status span').textContent = i18n.t(offlineKey);
   if (noticeKey) $('notice').textContent = i18n.t(noticeKey);
-  if (pickupKey) $('pickup-notice').textContent = i18n.t(pickupKey);
+  if (pickupKey) $('pickup-notice').textContent = pickupText();
   renderRecords(); updateScreen(); updateHud();
   if (lastResult) renderResult();
   if ($('archive-dialog').open) renderArchive();
@@ -92,7 +94,8 @@ function updateHud() {
   setText('wave', String(game.wave).padStart(2, '0'));
   setText('hp-value', Math.ceil(player.hp)); $('hp').value = player.hp;
   setText('lives', String(player.lives).padStart(2, '0'));
-  setText('weapon', `L${player.level}`);
+  setText('weapon', weaponText());
+  setText('mobile-weapon', weaponText());
   setText('combo', `×${Math.max(1, game.combo)}`);
   setText('equipment', [player.shield ? i18n.t('shield') : '', player.homing ? i18n.t('homing') : ''].filter(Boolean).join(' / '));
   const track = audio.currentTrack;
@@ -123,7 +126,7 @@ function handleEvent(event) {
   audio.sfx(event.type);
   if (event.type === 'pickup') {
     pickupKey = `pickup.${event.pickup}`; pickupUntil = game.time + UI.pickupNotice;
-    $('pickup-notice').textContent = i18n.t(pickupKey); $('pickup-notice').hidden = false;
+    $('pickup-notice').textContent = pickupText(); $('pickup-notice').hidden = false;
   }
   if (event.type === 'gameover') {
     clearInput(); lastResult = { score: game.score, wave: game.wave, kills: game.kills, time: game.time };

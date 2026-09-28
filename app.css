@@ -541,6 +541,9 @@ footer>span {
   color:var(--accent);
   letter-spacing:2px
 }
+.mobile-weapon {
+  display:none
+}
 .hud-hull {
   width:100px
 }
@@ -1146,6 +1149,13 @@ textarea {
   .hud-weapon {
     display:none
   }
+  .hud-score .mobile-weapon {
+    display:block;
+    color:var(--accent);
+    font-size:9px;
+    line-height:1.2;
+    white-space:nowrap
+  }
   .hud .icon-button {
     width:44px;
     flex-shrink:0
@@ -1517,6 +1527,13 @@ footer a {
   .hud-weapon {
     display: none;
   }
+  .hud-score .mobile-weapon {
+    display:block;
+    color:var(--accent);
+    font-size:9px;
+    line-height:1.2;
+    white-space:nowrap;
+  }
   .hud .icon-button {
     flex-shrink: 0;
   }
@@ -1614,6 +1631,9 @@ footer a {
   }
   .hero-copy .auto-label {
     display: none;
+  }
+  .hud-score .mobile-weapon {
+    font-size: 7px;
   }
 }
 @media (max-height: 620px) {

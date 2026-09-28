@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Game } from '../src/core/game.js';
-import { GAME } from '../src/data/game.js';
+import { GAME, WEAPONS } from '../src/data/game.js';
 
 const makeGame = () => {
   const game = new Game({ random: () => 0.99 });
@@ -123,7 +123,7 @@ test('player and enemy projectile pools remain bounded during maximum firepower'
 test('a lethal bomb blast makes score and lives terminal before later shot collisions', () => {
   const game = makeGame();
   game.startWave(5);
-  game.player.lives = 1; game.player.hp = 20; game.score = 49950;
+  game.player.lives = 1; game.player.hp = 20; game.score = GAME.bonusLifeScore - 50;
   game.fireClock = 0;
   const enemy = game._spawnEnemy('E1', game.player.x, 200);
   enemy.hp = 1; enemy.phase = 0;
@@ -161,7 +161,7 @@ test('a full player projectile pool cannot suppress an enemy volley, or vice ver
   assert.equal(game._bullet(true, 900, 100, 0, 0, 1), null);
   game.bullets[0].active = false;
   game.fireClock = 0;
-  game.update(GAME.player.fireInterval);
+  game.update(WEAPONS[0].interval);
   assert.equal(game.bullets.filter(b => b.active).length, GAME.player.bulletCap);
 });
 
@@ -180,4 +180,72 @@ test('expanded formations finish spawning inside the battlefield before the wave
       assert.ok(enemy.y >= 0 && enemy.y + enemy.h / 2 < game.player.y - game.player.h / 2);
     }
   }
+});
+
+test('penetrating shots hit each target once and lose penetration when a pooled slot is reused', () => {
+  const game = makeGame();
+  game.startWave(4);
+  const enemies = [180, 120, 60].map(y => game._spawnEnemy('E1', 480, y));
+  for (const enemy of enemies) enemy.hp = 10;
+  game.player.level = 6;
+  game.fireClock = 0;
+  game._playerFire(WEAPONS[5].interval);
+  const shot = game.bullets.find(b => b.vx === 0);
+  for (const bullet of game.bullets) if (bullet !== shot) bullet.active = false;
+  shot.y = 180;
+  game._resolveCollisions();
+  game._resolveCollisions();
+  assert.equal(enemies[0].hp, 9);
+  shot.y = 120;
+  game._resolveCollisions();
+  shot.y = 60;
+  game._resolveCollisions();
+  assert.deepEqual(enemies.map(e => e.hp), [9, 9, 9]);
+  assert.equal(shot.active, false);
+  for (const enemy of enemies) enemy.y = 180;
+  game._bullet(false, 480, 180, 0, 0, 1);
+  game._resolveCollisions();
+  assert.deepEqual(enemies.map(e => e.hp), [8, 9, 9]);
+});
+
+test('shields stop piercing rounds and plasma respects radius and one hit per target', () => {
+  const game = makeGame();
+  game.startWave(4);
+  const target = game._spawnEnemy('E1', 480, 180);
+  const nearby = game._spawnEnemy('E1', 515, 180);
+  const outside = game._spawnEnemy('E1', 560, 180);
+  const shield = game._spawnEnemy('E11', 480, 145);
+  for (const enemy of game.enemies) enemy.hp = 10;
+  game.player.level = 8;
+  game.fireClock = 0;
+  game._playerFire(WEAPONS[7].interval);
+  const shot = game.bullets.find(b => b.vx === 0);
+  for (const bullet of game.bullets) if (bullet !== shot) bullet.active = false;
+  shot.y = 180;
+  game._resolveCollisions();
+  game._resolveCollisions();
+  assert.deepEqual([target.hp, nearby.hp, outside.hp, shield.hp, shield.shield], [8, 9, 10, 10, 1]);
+  shot.active = false;
+  const piercing = game._bullet(false, shield.x, shield.y, 0, 0, 3, { pierce: 4 });
+  game._resolveCollisions();
+  assert.equal(piercing.active, false);
+  assert.equal(shield.hp, 10);
+  assert.equal(shield.shield, 0);
+});
+
+test('score lives require crossing a threshold and a large award respects the lifetime cap', () => {
+  const game = makeGame();
+  game._award(GAME.bonusLifeScore - 1);
+  assert.equal(game.player.lives, 3);
+  assert.equal(game.bonusLives, 0);
+  game._award(1);
+  assert.equal(game.player.lives, 4);
+  assert.equal(game.bonusLives, 1);
+  assert.equal(game.player.bank, 0);
+  game._award(GAME.bonusLifeScore * 10 + 37);
+  assert.equal(game.player.lives, 3 + GAME.bonusLifeCap);
+  assert.equal(game.bonusLives, GAME.bonusLifeCap);
+  assert.equal(game.player.bank, 37);
+  game._award(GAME.bonusLifeScore);
+  assert.equal(game.player.lives, 3 + GAME.bonusLifeCap);
 });

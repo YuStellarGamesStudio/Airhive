@@ -105,6 +105,9 @@ export class Renderer {
       this.flash = Math.max(this.flash, 0.13);
     } else if (type === 'pickup' || type === 'life' || type === 'upgrade') {
       this.spawn(x, y, V.pickupParticles, 'spark');
+    } else if (type === 'plasma') {
+      this.spawn(x, y, V.plasmaParticles, 'spark');
+      this.spawn(x, y, 4, 'flame');
     } else if (type === 'gameover') {
       this.spawn(x, y, V.bossExplosionParticles, 'smoke');
       this.shake = V.shakeBoss;
@@ -186,6 +189,90 @@ export class Renderer {
     ctx.restore();
   }
 
+  drawPlayerShot(ctx, shot, vx, vy, speed) {
+    const kind = shot.homing ? 'missile' : shot.kind;
+    if (kind === 'shot' || !kind) return false;
+    const ux = vx / speed, uy = vy / speed;
+    const x = shot.x, y = shot.y;
+    if (kind === 'missile') {
+      ctx.strokeStyle = 'rgba(255,163,91,.55)';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(x - ux * 10, y - uy * 10);
+      ctx.lineTo(x - ux * 23, y - uy * 23);
+      ctx.stroke();
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(Math.atan2(vy, vx) + Math.PI / 2);
+      ctx.fillStyle = '#e9d5b0';
+      ctx.strokeStyle = '#396779';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, -11); ctx.lineTo(5, -2); ctx.lineTo(4, 7);
+      ctx.lineTo(8, 10); ctx.lineTo(3, 9); ctx.lineTo(-3, 9);
+      ctx.lineTo(-8, 10); ctx.lineTo(-4, 7); ctx.lineTo(-5, -2);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#f3915a';
+      ctx.fillRect(-2, 8, 4, 4);
+      ctx.restore();
+    } else if (kind === 'rapid') {
+      ctx.strokeStyle = 'rgba(75,234,225,.42)';
+      ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(x - ux * 14, y - uy * 14); ctx.lineTo(x, y); ctx.stroke();
+      ctx.strokeStyle = '#b8fff2';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x - ux * 9, y - uy * 9); ctx.lineTo(x + ux * 3, y + uy * 3); ctx.stroke();
+    } else if (kind === 'pierce') {
+      ctx.strokeStyle = 'rgba(223,129,255,.35)';
+      ctx.lineWidth = 8;
+      ctx.beginPath(); ctx.moveTo(x - ux * 27, y - uy * 27); ctx.lineTo(x + ux * 5, y + uy * 5); ctx.stroke();
+      ctx.strokeStyle = '#e7a8ff';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(x - ux * 19, y - uy * 19); ctx.lineTo(x + ux * 8, y + uy * 8); ctx.stroke();
+      ctx.fillStyle = '#fff2ff';
+      ctx.beginPath(); ctx.arc(x + ux * 8, y + uy * 8, 2.5, 0, TAU); ctx.fill();
+    } else if (kind === 'plasma') {
+      ctx.strokeStyle = 'rgba(151,113,248,.48)';
+      ctx.lineWidth = 7;
+      ctx.beginPath(); ctx.moveTo(x - ux * 18, y - uy * 18); ctx.lineTo(x, y); ctx.stroke();
+      ctx.fillStyle = '#765dd2';
+      ctx.beginPath(); ctx.arc(x, y, 9, 0, TAU); ctx.fill();
+      ctx.strokeStyle = '#d6afff'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(x, y, 9, 0, TAU); ctx.stroke();
+      ctx.fillStyle = '#fff4e8';
+      ctx.beginPath(); ctx.arc(x, y, 4, 0, TAU); ctx.fill();
+    } else if (kind === 'rail') {
+      ctx.strokeStyle = 'rgba(252,213,118,.3)';
+      ctx.lineWidth = 11;
+      ctx.beginPath(); ctx.moveTo(x - ux * 42, y - uy * 42); ctx.lineTo(x + ux * 7, y + uy * 7); ctx.stroke();
+      ctx.strokeStyle = '#ffdc8e';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(x - ux * 38, y - uy * 38); ctx.lineTo(x + ux * 9, y + uy * 9); ctx.stroke();
+      ctx.strokeStyle = '#fffbed';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(x - ux * 24, y - uy * 24); ctx.lineTo(x + ux * 9, y + uy * 9); ctx.stroke();
+    } else if (kind === 'nova') {
+      ctx.strokeStyle = 'rgba(115,237,202,.52)';
+      ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.moveTo(x - ux * 26, y - uy * 26); ctx.lineTo(x, y); ctx.stroke();
+      ctx.fillStyle = '#69d9c1';
+      ctx.strokeStyle = '#f7efb9';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const angle = i * Math.PI / 4;
+        const radius = i % 2 ? 6 : 12;
+        if (i) ctx.lineTo(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius);
+        else ctx.moveTo(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius);
+      }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fff9df';
+      ctx.beginPath(); ctx.arc(x, y, 3.5, 0, TAU); ctx.fill();
+    } else return false;
+    return true;
+  }
+
+
   drawShots(ctx, shots, enemy = false) {
     if (!shots) return;
     for (const shot of shots) {
@@ -222,6 +309,7 @@ export class Renderer {
       const direction = enemy ? 1 : -1;
       const vx = shot.vx || 0, vy = shot.vy ?? direction;
       const speed = Math.hypot(vx, vy) || 1;
+      if (!enemy && this.drawPlayerShot(ctx, shot, vx, vy, speed)) continue;
       const length = enemy ? V.enemyTrail : V.bulletTrail;
       const endX = shot.x - vx / speed * length;
       const endY = shot.y - vy / speed * length;

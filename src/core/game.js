@@ -1,4 +1,4 @@
-import { GAME, ENEMIES, BOSSES, FORMATIONS, MOTION, PICKUPS } from '../data/game.js';
+import { GAME, WEAPONS, ENEMIES, BOSSES, FORMATIONS, MOTION, PICKUPS } from '../data/game.js';
 import { planWave, PLAN_STRIDE } from './wave-plan.js';
 
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
@@ -55,7 +55,7 @@ export class Game {
     this.enemies.length = this.pickups.length = this.obstacles.length = this.warnings.length = 0;
     for (const pool of [this.bullets, this.enemyBullets]) for (const bullet of pool) bullet.active = false;
     this.nextId = 1;
-    this.fireClock = GAME.player.fireInterval;
+    this.fireClock = WEAPONS[0].interval;
     this.homingClock = 0;
     this.slowMotion = 0;
     this.firstDrop = false;
@@ -212,27 +212,39 @@ export class Game {
   }
 
   _playerFire(dt) {
+    const p = this.player;
+    const weapon = WEAPONS[p.level - 1];
+    const missiles = (weapon.missiles ?? 0) + Number(p.homing);
+    if (missiles) {
+      this.homingClock += dt;
+      const interval = p.homing ? Math.min(GAME.player.homingInterval,
+        weapon.missileInterval ?? GAME.player.homingInterval) : weapon.missileInterval;
+      if (this.homingClock >= interval) {
+        this.homingClock -= interval;
+        if (this._nearestEnemy(p.x, p.y)) {
+          for (let i = 0; i < missiles; i++) {
+            const offset = (i - (missiles - 1) / 2) * GAME.player.homingSpacing;
+            this._bullet(false, p.x + offset, p.y - p.h / 2,
+              0, -GAME.player.homingSpeed, weapon.damage, { homing: true, kind: 'missile' });
+          }
+        }
+      }
+    } else this.homingClock = 0;
     this.fireClock += dt;
-    while (this.fireClock >= GAME.player.fireInterval) {
-      this.fireClock -= GAME.player.fireInterval;
-      const p = this.player;
-      const offsets = p.level === GAME.player.maxLevel ? GAME.shotOffsets : GAME.player.volleyOffsets[p.level - 1];
+    while (this.fireClock >= weapon.interval) {
+      this.fireClock -= weapon.interval;
       let fired = false;
-      for (let i = 0; i < offsets.length; i++) {
-        const angle = p.level === GAME.player.maxLevel ? GAME.shotFan[i] : 0;
-        if (this._bullet(false, p.x + offsets[i], p.y - p.h / 2,
-          Math.sin(angle) * GAME.player.bulletSpeed,
-          -Math.cos(angle) * GAME.player.bulletSpeed, GAME.player.bulletDamage)) fired = true;
+      for (const shot of weapon.shots) {
+        const bullet = this._bullet(false, p.x + shot.offset, p.y - p.h / 2,
+          shot.vx, shot.vy, weapon.damage);
+        if (!bullet) continue;
+        bullet.kind = weapon.kind;
+        bullet.pierce = weapon.pierce ?? 0;
+        bullet.splashRadius = weapon.splashRadius ?? 0;
+        bullet.splashDamage = weapon.splashDamage ?? 0;
+        fired = true;
       }
       if (fired) this.onEvent({ type: 'shot', x: p.x, y: p.y });
-    }
-    if (!this.player.homing) return;
-    this.homingClock += dt;
-    if (this.homingClock >= GAME.player.homingInterval) {
-      this.homingClock -= GAME.player.homingInterval;
-      const target = this._nearestEnemy(this.player.x, this.player.y);
-      if (target) this._bullet(false, this.player.x, this.player.y - this.player.h / 2,
-        0, -GAME.player.homingSpeed, GAME.player.bulletDamage, { homing: true });
     }
   }
 
@@ -247,13 +259,15 @@ export class Game {
     if (active >= cap) return null;
     if (!bullet) {
       if (pool.length >= cap) return null;
-      bullet = {};
+      bullet = enemy ? {} : { hitIds: [] };
       pool.push(bullet);
     }
     bullet.x = x; bullet.y = y; bullet.vx = vx; bullet.vy = vy;
     bullet.w = bullet.h = enemy ? GAME.enemyBulletSize : GAME.playerShotSize;
     bullet.damage = damage; bullet.homing = false; bullet.slow = false;
     bullet.kind = 'shot'; bullet.delay = 0; bullet.active = true; bullet.age = 0; bullet.enemy = enemy;
+    bullet.pierce = 0; bullet.splashRadius = 0; bullet.splashDamage = 0;
+    if (!enemy) bullet.hitIds.length = 0;
     if (extra) Object.assign(bullet, extra);
     return bullet;
   }
@@ -611,7 +625,8 @@ export class Game {
       for (const obstacle of this.obstacles) {
         if (obstacle.active && overlaps(bullet, obstacle)) {
           bullet.active = false;
-          if (--obstacle.hp <= 0) {
+          obstacle.hp -= bullet.damage;
+          if (obstacle.hp <= 0) {
             obstacle.active = false; this._award(GAME.wave.obstacleScore);
             this.onEvent({ type: 'explosion', x: obstacle.x, y: obstacle.y });
           }
@@ -620,36 +635,58 @@ export class Game {
       }
       if (!bullet.active) continue;
       for (const e of this.enemies) {
-        if (!e.active || e.invisible || !overlaps(bullet, e)) continue;
-        bullet.active = false;
-        if (e.shield > 0) { e.shield--; this.onEvent({ type: 'shield', x: e.x, y: e.y }); }
-        else {
-          e.hp -= bullet.damage;
-          this.onEvent({ type: 'hit', x: e.x, y: e.y });
-          if (e.hp <= 0) this._kill(e);
+        if (!e.active || e.invisible || bullet.hitIds.includes(e.id) || !overlaps(bullet, e)) continue;
+        bullet.hitIds.push(e.id);
+        const penetrated = this._damageEnemy(e, bullet.damage);
+        if (penetrated && bullet.splashRadius) {
+          this.onEvent({ type: 'plasma', x: e.x, y: e.y });
+          const radiusSquared = bullet.splashRadius ** 2;
+          for (const nearby of this.enemies) {
+            if (!nearby.active || nearby.invisible || bullet.hitIds.includes(nearby.id) ||
+              (nearby.x - e.x) ** 2 + (nearby.y - e.y) ** 2 > radiusSquared) continue;
+            bullet.hitIds.push(nearby.id);
+            this._damageEnemy(nearby, bullet.splashDamage);
+          }
         }
-        break;
+        if (!penetrated || bullet.pierce === 0) { bullet.active = false; break; }
+        bullet.pierce--;
       }
     }
     for (const obstacle of this.obstacles) if (obstacle.active && overlaps(p, obstacle, GAME.player.hitScale)) {
       obstacle.active = false;
       this.damagePlayer(0, { obstacle: true });
+      if (this.state !== 'playing') return;
     }
     for (const bullet of this.enemyBullets) if (bullet.active && bullet.delay <= 0 &&
       overlaps(p, bullet, GAME.player.hitScale)) {
       bullet.active = false;
       const damaged = this.damagePlayer(bullet.damage);
       if (damaged && bullet.slow && this.state === 'playing') p.slow = GAME.player.slowDuration;
+      if (this.state !== 'playing') return;
     }
     for (const e of this.enemies) if (e.active && overlaps(p, e, GAME.player.hitScale)) {
       this.damagePlayer(e.damage);
       if (!e.boss) e.active = false;
+      if (this.state !== 'playing') return;
     }
     for (const pickup of this.pickups) if (pickup.active && overlaps(p, pickup, GAME.player.hitScale)) {
       pickup.active = false;
       this.collect(pickup.type);
     }
   }
+
+  _damageEnemy(enemy, damage) {
+    if (enemy.shield > 0) {
+      enemy.shield--;
+      this.onEvent({ type: 'shield', x: enemy.x, y: enemy.y });
+      return false;
+    }
+    enemy.hp -= damage;
+    this.onEvent({ type: 'hit', x: enemy.x, y: enemy.y });
+    if (enemy.hp <= 0) this._kill(enemy);
+    return true;
+  }
+
 
   damagePlayer(amount, { obstacle = false } = {}) {
     if (this.state !== 'playing') return false;
