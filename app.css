@@ -153,7 +153,14 @@ a:hover {
   color:var(--muted);
   letter-spacing:1.3px;
   padding-bottom:16px;
-  gap:16px
+  gap:8px 16px;
+  flex-wrap:wrap
+}
+.compute-status {
+  flex-basis:100%;
+  text-align:right;
+  color:var(--green);
+  letter-spacing:.5px
 }
 .flight-strip>span:first-child {
   color:var(--green);

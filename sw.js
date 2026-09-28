@@ -1,5 +1,5 @@
 // Generated cache metadata is updated by tools/hash-assets.mjs.
-const VERSION = 'airhive-cb1cb189147dbfcc';
+const VERSION = 'airhive-40c78171b9dc63cb';
 const PRECACHE = [
   "index.html",
   "LICENSE",
@@ -96,8 +96,8 @@ const PRECACHE = [
   "src/vendor/opm/package.json",
   "src/vendor/opm/provenance.json",
   "LICENSE?v=0d96a4ff68ad6d4b",
-  "app.css?v=026acc8ef9e4c1d4",
-  "app.js?v=68b690ffb79854ee",
+  "app.css?v=463932f777041582",
+  "app.js?v=3fad89dd209dfa48",
   "assets/art/B1.svg?v=359c12f8666fa665",
   "assets/art/B2.svg?v=9b8fe999bbe90a89",
   "assets/art/B3.svg?v=8d55ec6a6adb8c2b",
@@ -170,7 +170,7 @@ const PRECACHE = [
   "src/data/settings.js?v=72e6e6ab5d33938c",
   "src/data/visuals.js?v=77cba586ff31fda2",
   "src/i18n/index.js?v=c61a00ffe4008ca1",
-  "src/i18n/strings.js?v=6fad35e607842586",
+  "src/i18n/strings.js?v=df798cbd377b624d",
   "src/render/renderer.js?v=abb7c85b6e54c33b",
   "src/save/storage.js?v=9053b22ddad9296b",
   "src/vendor/opm/LICENSE?v=cfc7749b96f63bd3",
