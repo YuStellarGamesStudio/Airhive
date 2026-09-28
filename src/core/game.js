@@ -1,4 +1,5 @@
 import { GAME, ENEMIES, BOSSES, FORMATIONS, MOTION, PICKUPS } from '../data/game.js';
+import { planWave, PLAN_STRIDE } from './wave-plan.js';
 
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 const overlaps = (a, b, scale = 1) => Math.abs(a.x - b.x) * 2 < a.w * scale + b.w &&
@@ -72,9 +73,8 @@ export class Game {
     this.waveGap = 0;
     this.spawned = 0;
     this.nextSpawn = GAME.wave.initialDelay;
-    this.spawnCount = Math.min(GAME.enemyCap, Math.min(GAME.wave.countCap,
-      GAME.wave.baseCount + Math.floor((number - 1) / GAME.wave.growthEvery)));
-    this.pattern = (number - 1) % FORMATIONS.length;
+    this.wavePlan = planWave(number);
+    this.spawnCount = this.wavePlan.length / PLAN_STRIDE;
     this.waveBanner = GAME.wave.banner;
     this.enemies.length = this.obstacles.length = this.warnings.length = 0;
     // Retain in-flight drops without accumulating spent pickups across waves.
@@ -150,28 +150,8 @@ export class Game {
       this.waveDrop = null;
     }
     if (!this.boss && this.spawned < this.spawnCount && this.waveTime >= this.nextSpawn) {
-      const slot = this.spawned++;
-      const profile = FORMATIONS[this.pattern];
-      const column = slot % profile.columns;
-      const row = Math.floor(slot / profile.columns);
-      const relative = column - (profile.columns - 1) / 2;
-      let offset = 0;
-      switch (profile.shape) {
-        case 'v': offset = Math.abs(relative) * GAME.formationOffsets.v; break;
-        case 'arc': offset = relative * relative * GAME.formationOffsets.arc; break;
-        case 'stagger': offset = column % 2 * GAME.formationOffsets.stagger; break;
-        case 'wings': offset = (profile.columns / 2 - Math.abs(relative)) * GAME.formationOffsets.wings; break;
-        case 'zigzag': offset = column % 2 ? -GAME.formationOffsets.zigzag : GAME.formationOffsets.zigzag; break;
-        default: break;
-      }
-      const unlocked = Math.min(GAME.enemyTypeCount, GAME.earlyTypeCount +
-        Math.max(0, this.wave - GAME.wave.unlockStart + 1) * GAME.wave.unlockPerWave);
-      const introduction = this.wave === GAME.wave.lifeEvery + 1 ? GAME.wave.lifeEvery : this.wave;
-      const newly = GAME.earlyTypeCount + (introduction - GAME.wave.unlockStart) * GAME.wave.unlockPerWave;
-      const kind = introduction >= GAME.wave.unlockStart && (slot === 1 || slot === 2) ?
-        Math.min(unlocked, newly + slot) : slot % 3 === 0 ? 1 : 1 + ((slot + this.wave * 3) % unlocked);
-      this._spawnEnemy(`E${kind}`, GAME.width / 2 + relative * GAME.wave.columnSpacing,
-        GAME.wave.baseY + row * GAME.wave.rowSpacing + offset);
+      const index = this.spawned++ * PLAN_STRIDE;
+      this._spawnEnemy(`E${this.wavePlan[index]}`, this.wavePlan[index + 1], this.wavePlan[index + 2]);
       this.nextSpawn += GAME.wave.spawnInterval;
     }
     if (this.waveTime >= this.nextObstacle && this.obstaclesScheduled < GAME.wave.obstacleMaxPerWave && !this.boss) {
@@ -258,24 +238,15 @@ export class Game {
 
   _bullet(enemy, x, y, vx, vy, damage, extra = null) {
     const pool = enemy ? this.enemyBullets : this.bullets;
-    const other = enemy ? this.bullets : this.enemyBullets;
-    let active = 0, playerActive = 0;
-    for (const candidate of this.bullets) if (candidate.active) { active++; playerActive++; }
-    for (const candidate of this.enemyBullets) if (candidate.active) active++;
-    if (active >= GAME.projectileCap || (!enemy && playerActive >= GAME.player.bulletCap)) return null;
-    let bullet = null;
-    for (const candidate of pool) if (!candidate.active) { bullet = candidate; break; }
-    if (!bullet) {
-      for (let i = 0; i < other.length; i++) if (!other[i].active) {
-        bullet = other[i];
-        other[i] = other[other.length - 1];
-        other.pop();
-        pool.push(bullet);
-        break;
-      }
+    const cap = enemy ? GAME.enemyBulletCap : GAME.player.bulletCap;
+    let active = 0, bullet = null;
+    for (const candidate of pool) {
+      if (candidate.active) active++;
+      else if (!bullet) bullet = candidate;
     }
+    if (active >= cap) return null;
     if (!bullet) {
-      if (pool.length + other.length >= GAME.projectileCap) return null;
+      if (pool.length >= cap) return null;
       bullet = {};
       pool.push(bullet);
     }

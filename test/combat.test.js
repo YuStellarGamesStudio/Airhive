@@ -91,6 +91,7 @@ test('bomb kills all regular enemies with capped combo and half score', () => {
 test('first drop cannot be missed by a player who never fires into the formation', () => {
   const game = makeGame();
   game.player.x = GAME.player.w / 2;
+  game.fireClock = -GAME.wave.firstDropTime;
   advance(game, GAME.wave.firstDropTime + GAME.step);
   assert.equal(game.wave, 1);
   assert.equal(game.pickups.some(p => p.active && p.type === 'power'), true);
@@ -106,7 +107,7 @@ test('eight boss types rotate after wave 80 without starting obstacles', () => {
   }
 });
 
-test('shared player/enemy projectile pool never exceeds 20 objects or active shots', () => {
+test('player and enemy projectile pools remain bounded during maximum firepower', () => {
   const game = makeGame();
   game.startWave(20);
   game.boss.hp = 1_000_000;
@@ -114,9 +115,8 @@ test('shared player/enemy projectile pool never exceeds 20 objects or active sho
   game.player.invulnerable = Infinity;
   for (let n = 0; n < 6 / GAME.step; n++) {
     game.update(GAME.step);
-    const all = [...game.bullets, ...game.enemyBullets];
-    assert.ok(all.length <= GAME.projectileCap);
-    assert.ok(all.filter(b => b.active).length <= GAME.projectileCap);
+    assert.ok(game.bullets.length <= GAME.player.bulletCap);
+    assert.ok(game.enemyBullets.length <= GAME.enemyBulletCap);
   }
 });
 
@@ -146,4 +146,38 @@ test('an untimed summoning boss retains only a bounded enemy collection', () => 
   advance(game, 1800);
   assert.equal(game.wave, 80);
   assert.ok(game.enemies.length <= GAME.enemyCap);
+});
+
+test('a full player projectile pool cannot suppress an enemy volley, or vice versa', () => {
+  const game = makeGame();
+  game.startWave(21);
+  game.nextSpawn = Infinity;
+  for (let n = 0; n < GAME.player.bulletCap; n++) game._bullet(false, 40, 400, 0, 0, 1);
+  const enemy = game._spawnEnemy('E3', 480, 120);
+  enemy.shotTimer = 10;
+  game.update(GAME.step);
+  assert.equal(game.enemyBullets.filter(b => b.active).length, 3);
+  while (game.enemyBullets.length < GAME.enemyBulletCap) game._bullet(true, 900, 100, 0, 0, 1);
+  assert.equal(game._bullet(true, 900, 100, 0, 0, 1), null);
+  game.bullets[0].active = false;
+  game.fireClock = 0;
+  game.update(GAME.player.fireInterval);
+  assert.equal(game.bullets.filter(b => b.active).length, GAME.player.bulletCap);
+});
+
+test('expanded formations finish spawning inside the battlefield before the wave deadline', () => {
+  const game = makeGame();
+  for (const wave of [1, 21, 41, 42, 43, 44, 45, 46]) {
+    game.startWave(wave);
+    game.nextObstacle = Infinity;
+    while (game.spawned < game.spawnCount && game.waveTime < GAME.wave.duration) {
+      game.waveTime += GAME.step;
+      game._waveTick(GAME.step);
+    }
+    assert.equal(game.enemies.length, game.spawnCount);
+    for (const enemy of game.enemies) {
+      assert.ok(enemy.x - enemy.w / 2 >= 0 && enemy.x + enemy.w / 2 <= GAME.width);
+      assert.ok(enemy.y >= 0 && enemy.y + enemy.h / 2 < game.player.y - game.player.h / 2);
+    }
+  }
 });
