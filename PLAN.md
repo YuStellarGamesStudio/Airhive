@@ -361,7 +361,7 @@
 airhive/                      # 倉庫 https://github.com/YueyuHoshizora/Airhive.git → airhive.yustellar.dev
 ├── index.html
 ├── app.js                    # 主要 JS 入口（決議 #27）
-├── styles.css
+├── app.css
 ├── favicon.ico               # 根目錄（決議 #26）
 ├── manifest.webmanifest
 ├── sw.js                     # Service Worker（雜湊版本化）

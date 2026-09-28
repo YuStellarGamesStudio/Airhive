@@ -31,10 +31,18 @@ npm run assets:hash
 npm run assets:check
 ```
 
+The entrypoints are `index.html`, `app.js`, and `app.css`. Run `npm run assets:hash` after changing code or assets, then commit the updated HTML, asset map, and service worker together. `assets:check` rejects stale fingerprints.
+
+## Implemented / 已實作 / 実装済み
+
+16 enemy types, eight rotating bosses, six automatic pickups, layered SVG artwork, 24 original FM scores, separate effects controls, and offline local saves are integrated. The runtime is plain ES modules with vendored OPM.js 1.1.0.
+
+`npm test` passes 14 regression tests. Real Chromium smoke runs cover keyboard/touch input, all three languages, responsive layouts, safe imports, service-worker upgrades, and a complete sortie with the HTTP server stopped. Device installation, listening review, and player-balance statistics remain manual checks in [ACCEPTANCE.md](ACCEPTANCE.md).
+
 ## Deployment / 部署 / 公開
 
 Static GitHub Pages repository: <https://github.com/YueyuHoshizora/Airhive>.
-Custom domain: `airhive.yustellar.dev`. Push and DNS configuration are manual owner actions. Offline caches never remove localStorage saves. New versions activate on a later visit after older tabs close.
+Custom domain: `airhive.yustellar.dev`. The isolated CNAME commit has been pushed as explicitly requested; application commits remain local. `.nojekyll` is included. Enable Pages for the repository root and configure DNS as owner actions. Offline caches never remove localStorage saves; a new release activates after older game tabs close.
 
 ## License
 
