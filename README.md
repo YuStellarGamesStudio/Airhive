@@ -55,8 +55,8 @@ The start screen separately shows **compute** (WebGPU / CPU multithreading with 
 
 ## Deployment / 部署 / 公開
 
-Static GitHub Pages repository: <https://github.com/YueyuHoshizora/Airhive>.
-Custom domain: `airhive.yustellar.dev`. The isolated CNAME commit has been pushed as explicitly requested; application commits remain local. `.nojekyll` is included. Enable Pages for the repository root and configure DNS as owner actions. Offline caches never remove localStorage saves; a new release activates after older game tabs close.
+Static GitHub Pages repository: <https://github.com/YuStellarGamesStudio/Airhive>.
+Custom domain: `airhive.ysgs.app`. `.nojekyll` is included. Enable Pages for the repository root and configure DNS as owner actions. Offline caches never remove localStorage saves; a new release activates after older game tabs close.
 
 Link previews use Open Graph and Twitter card tags with an English 1200×630 image at `assets/social/og-image.png` (absolute URLs on the custom domain). Its source is `tools/share-card.html`, which composes the shipped game art; re-export it after art changes. The share image is excluded from offline caches.
 

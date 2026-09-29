@@ -2,7 +2,7 @@
 
 權威規格：`PLAN.md` 第 12.5 節。以下在觀察到實際結果後更新；未勾選不是已通過。
 
-自訂網域設定：`CNAME` 改為 `airhive.ysgs.app`；此項僅更新部署設定，DNS、GitHub Pages 與公開站台尚未驗證。
+自訂網域設定：`CNAME`、canonical、Open Graph／Twitter 分享網址、分享圖與文件同步為 `airhive.ysgs.app`；原始碼連結與文件倉庫同步為 `YuStellarGamesStudio/Airhive`。本機 Chromium 已驗證頁面網址、首頁顯示及重新輸出的 1200×630 分享圖，無頁面錯誤；舊網址搜尋無殘留。`npm test` 52 項通過，`npm run assets:hash` 產生 99 項資產（`airhive-b297de0d66849958`）。DNS、GitHub Pages 與公開站台尚未驗證。
 
 ## 功能
 - [x] 首頁不自動開局；一點開始即自動開火。

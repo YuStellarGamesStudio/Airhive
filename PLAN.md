@@ -13,8 +13,8 @@
 | --- | --- |
 | 類型 | 固定炮台式射擊（小蜜蜂／Galaga-like） |
 | 平台 | 純網頁（桌面＋行動瀏覽器） |
-| 網址 | GitHub Pages，`airhive.yustellar.dev` |
-| 遠端倉庫 | `https://github.com/YueyuHoshizora/Airhive.git` |
+| 網址 | GitHub Pages，`airhive.ysgs.app` |
+| 遠端倉庫 | `https://github.com/YuStellarGamesStudio/Airhive.git` |
 | 儲存 | localStorage 免登入，匯出／匯入雙軌 |
 | 語言 | 英文預設，繁中／日文（`?lang=zh/en/ja`） |
 | 調性 | 寫實近未來航太插畫 × 16-bit FM 電子音的復古反差 |
@@ -252,7 +252,7 @@ Boss B1–B8 基礎 HP 為 **128／140／156／132／160／160／176／210**；�
 | 存檔 | localStorage＋匯出/匯入雙軌 |
 | 數值 | 全數值集中 `src/data/`（敵機表、道具表、波次表、音色表） |
 | 路由 | `?lang=`＋History API |
-| 部署 | GitHub Pages，CNAME `airhive.yustellar.dev`；遠端倉庫 `https://github.com/YueyuHoshizora/Airhive.git` |
+| 部署 | GitHub Pages，CNAME `airhive.ysgs.app`；遠端倉庫 `https://github.com/YuStellarGamesStudio/Airhive.git` |
 | PWA | 必做：standalone 安裝、iOS 加入主畫面、離線可玩（飛機模式驗收） |
 | favicon | `favicon.ico` 置根目錄（決議 #26） |
 | 分享預覽 | Open Graph／Twitter `summary_large_image`；英文 1200×630 分享圖 `assets/social/og-image.png`，來源 `tools/share-card.html`；不納入離線快取 |
@@ -329,7 +329,7 @@ Boss B1–B8 基礎 HP 為 **128／140／156／132／160／160／176／210**；�
 | 25 | 檔案規範：所有資源放 `assets/`；根目錄只放必要的檔案 |
 | 26 | favicon.ico 放根目錄 |
 | 27 | 主要 JS 入口命名 `app.js` |
-| 28 | 程式結構：遠端 git 倉庫 `https://github.com/YueyuHoshizora/Airhive.git` |
+| 28 | 程式結構：遠端 git 倉庫 `https://github.com/YuStellarGamesStudio/Airhive.git` |
 | 29 | 提交紀律：每完成一項功能即自動 commit（不推送），禁止整包提交；AGENTS.md 須載明此紀律 |
 | 30 | 授權全文收錄於本企劃書附錄 A；M0 由附錄全文轉入根目錄 LICENSE 檔（實檔至開工才建立） |
 | 31 | 介面：電腦版支援 ← → 與 A/D 鍵移動 |
@@ -354,7 +354,7 @@ Boss B1–B8 基礎 HP 為 **128／140／156／132／160／160／176／210**；�
 ### 12.1 強制執行範圍（硬規則）
 
 1. **本計畫只授權實作本遊戲**；不得延伸至其他專案、不得重構無關程式。
-2. **嚴禁 `git push`**——由使用者親自推送。遠端倉庫固定為 `https://github.com/YueyuHoshizora/Airhive.git`。**提交紀律：每完成一項功能立即自動 commit（不推送）；禁止整包提交——一個 commit 對應一項功能，message 描述該功能本身。**
+2. **嚴禁 `git push`**——由使用者親自推送。遠端倉庫固定為 `https://github.com/YuStellarGamesStudio/Airhive.git`。**提交紀律：每完成一項功能立即自動 commit（不推送）；禁止整包提交——一個 commit 對應一項功能，message 描述該功能本身。**
 3. 每個里程碑 M 結束時 git commit，message 以 `M0:`–`M7:` 前綴開頭；里程碑內的個別功能 commit 不加 M 前綴（見規則 2 提交紀律）。
 4. 純前端 HTML/CSS/JS（ES modules），**無框架、無 CDN、無 runtime 依賴**。
 5. 所有數值集中 `src/data/`，其他檔案不寫死數字；數值以第 3 節為準（目標與護欄）。**例外：BGM 音樂資料每首單獨 JSON，存 `assets/audios/`（決議 #18）。**
@@ -376,7 +376,7 @@ Boss B1–B8 基礎 HP 為 **128／140／156／132／160／160／176／210**；�
 ### 12.2 倉庫結構
 
 ```
-airhive/                      # 倉庫 https://github.com/YueyuHoshizora/Airhive.git → airhive.yustellar.dev
+airhive/                      # 倉庫 https://github.com/YuStellarGamesStudio/Airhive.git → airhive.ysgs.app
 ├── index.html
 ├── app.js                    # 主要 JS 入口（決議 #27）
 ├── app.css
@@ -411,7 +411,7 @@ airhive/                      # 倉庫 https://github.com/YueyuHoshizora/Airhive
 ### 12.3 里程碑 M0–M7
 
 **M0 專案骨架**
-- 建倉庫（remote = `https://github.com/YueyuHoshizora/Airhive.git`）；**立刻建立文件六件**：PLAN.md（企劃書轉入）、ACCEPTANCE.md、DESIGN.md、AGENTS.md、CLAUDE.md、README.md（三語）（決議 #23）。
+- 建倉庫（remote = `https://github.com/YuStellarGamesStudio/Airhive.git`）；**立刻建立文件六件**：PLAN.md（企劃書轉入）、ACCEPTANCE.md、DESIGN.md、AGENTS.md、CLAUDE.md、README.md（三語）（決議 #23）。
 - index.html＋`app.js` 入口、ES modules、PWA 殼（manifest＋SW＋favicon.ico）、i18n 路由（`?lang=`＋History API）。
 - 空畫面可安裝、離線可開。
 - 驗收：`?lang=ja` 可切換且不重載；飛機模式開頁不報錯。
