@@ -1,5 +1,5 @@
 // Generated cache metadata is updated by tools/hash-assets.mjs.
-const VERSION = 'airhive-035e9f76e2cd1711';
+const VERSION = 'airhive-7db4e2dca39c0601';
 const PRECACHE = [
   "index.html",
   "LICENSE",
@@ -167,13 +167,13 @@ const PRECACHE = [
   "src/core/attack-plan.js?v=1175003090596b02",
   "src/core/enemy-planner.js?v=21e31ab3373e758e",
   "src/core/enemy-worker.js?v=dde49d89126e22e7",
-  "src/core/game.js?v=c1ee592e27bfa962",
+  "src/core/game.js?v=b7c294a576e692d7",
   "src/core/wave-plan.js?v=a9a237c597e59da8",
   "src/core/webgpu-planner.js?v=cd086e1270694188",
   "src/core/webgpu-shaders.js?v=fbeac522bcc20b76",
   "src/data/assets.js?v=b53cf0a006a667fa",
   "src/data/audio.js?v=70ecc15afaf49b38",
-  "src/data/game.js?v=5d31e02d5efb0dcb",
+  "src/data/game.js?v=60b606777e037645",
   "src/data/settings.js?v=72e6e6ab5d33938c",
   "src/data/visuals.js?v=5743c6a9361ad47c",
   "src/i18n/index.js?v=c61a00ffe4008ca1",

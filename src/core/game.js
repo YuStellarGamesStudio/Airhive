@@ -43,6 +43,8 @@ export class Game {
     this.obstaclesScheduled = 0;
     this.waveDrop = null;
     this.firstDrop = false;
+    this.wavesWithoutPower = 0;
+    this.waveDropGuaranteed = false;
     this.earlyDamage = 0;
     this.bonusLives = 0;
     this.nextId = 1;
@@ -62,6 +64,7 @@ export class Game {
   start() {
     this.state = 'playing';
     this.time = this.score = this.combo = this.kills = this.earlyDamage = this.bonusLives = 0;
+    this.wave = 0;
     this.player = this._newPlayer();
     this.enemies.length = this.pickups.length = this.obstacles.length = this.warnings.length = 0;
     for (const pool of [this.bullets, this.enemyBullets]) for (const bullet of pool) bullet.active = false;
@@ -70,6 +73,7 @@ export class Game {
     this.homingClock = 0;
     this.slowMotion = 0;
     this.firstDrop = false;
+    this.wavesWithoutPower = 0;
     this.deathTimer = 0;
     this.deathReason = null;
     this.lifeLostThisStep = false;
@@ -99,6 +103,7 @@ export class Game {
   startWave(number) {
     if (this.state !== 'playing' || !Number.isInteger(number) || number < 1) return;
     this.stepEpoch++;
+    if (number !== this.wave && this.player.level < GAME.player.maxLevel) this.wavesWithoutPower++;
     this.wave = number;
     this.waveTime = 0;
     this.waveGap = 0;
@@ -120,11 +125,17 @@ export class Game {
     const roll = this.random();
     let accumulated = 0;
     this.waveDrop = null;
+    this.waveDropGuaranteed = false;
     for (const [type, chance] of Object.entries(GAME.wave.dropChance)) {
       accumulated += chance;
       if (roll < accumulated) { this.waveDrop = type; break; }
     }
     if (!this.firstDrop && number <= GAME.wave.earlyWaveEnd) this.waveDrop = 'power';
+    if (this.player.level < GAME.player.maxLevel &&
+      this.wavesWithoutPower >= GAME.wave.powerPityWaves) {
+      this.waveDrop = 'power';
+      this.waveDropGuaranteed = true;
+    }
     if (number % GAME.wave.lifeEvery === 0 && this.player.lives <= GAME.wave.lifeLowThreshold)
       this._drop('life', this.player.x, GAME.wave.baseY, true);
     if (number % GAME.wave.bossEvery === 0) {
@@ -307,8 +318,8 @@ export class Game {
     if (active >= GAME.enemyCap) return null;
     const info = boss ? BOSSES[type] : ENEMIES[type];
     const hpFactor = Math.min(GAME.enemyHpCap, 1 + (this.wave - 1) * GAME.enemyHpGrowth);
-    const hp = Math.ceil(info.hp * hpFactor + (boss ?
-      Math.floor((this.wave - 1) / (GAME.wave.bossEvery * GAME.cycleBossCount)) * GAME.boss.hpPerCycle : 0));
+    const hp = Math.max(1, Math.round(info.hp * hpFactor + (boss ?
+      Math.floor((this.wave - 1) / (GAME.wave.bossEvery * GAME.cycleBossCount)) * GAME.boss.hpPerCycle : 0)));
     const size = boss ? GAME.bossSize : GAME.enemySize;
     const e = { id: this.nextId++, type, x, y, homeX: x, homeY: y, w: size.w, h: size.h,
       hp, maxHp: hp, active: true, age: 0, phase: this.random() * TAU, shotTimer: 0,
@@ -722,13 +733,20 @@ export class Game {
       this.boss = null;
       this.slowMotion = GAME.wave.bossSlowMotion;
       this._drop('heal', e.x, e.y, true);
+      if (this.waveDropGuaranteed) {
+        this._drop('power', e.x, e.y, true);
+        this.waveDrop = null;
+        this.waveDropGuaranteed = false;
+        this.firstDrop = true;
+      }
       for (const ally of this.enemies) if (ally !== e) ally.active = false;
       for (const bullet of this.enemyBullets) bullet.active = false;
     } else {
       if (this.waveDrop) {
-        this._drop(this.waveDrop, e.x, e.y);
+        this._drop(this.waveDrop, e.x, e.y, this.waveDropGuaranteed);
         this.waveDrop = null;
         this.firstDrop = true;
+        this.waveDropGuaranteed = false;
       }
       if (this.random() < GAME.wave.healChance) this._drop('heal', e.x, e.y);
     }
@@ -740,6 +758,12 @@ export class Game {
     if (active >= GAME.pickupCap && !guaranteed) return;
     let drop = null;
     for (const pickup of this.pickups) if (!pickup.active) { drop = pickup; break; }
+    if (!drop && active >= GAME.pickupCap) {
+      for (const pickup of this.pickups)
+        if (pickup.type !== 'life' && (type !== 'power' || pickup.type !== 'heal')) {
+          drop = pickup; break;
+        }
+    }
     if (!drop && active >= GAME.pickupCap) {
       for (const pickup of this.pickups) if (pickup.type !== 'life') { drop = pickup; break; }
       drop ??= this.pickups[0];
@@ -756,7 +780,9 @@ export class Game {
     if (this.state !== 'playing' || !PICKUPS.includes(type)) return false;
     const p = this.player;
     switch (type) {
-      case 'power': p.level = Math.min(GAME.player.maxLevel, p.level + 1);
+      case 'power':
+        this.wavesWithoutPower = 0;
+        p.level = Math.min(GAME.player.maxLevel, p.level + 1);
         this.onEvent({ type: 'upgrade', x: p.x, y: p.y }); break;
       case 'homing': p.homing = true; break;
       case 'shield': p.shield = true; break;
