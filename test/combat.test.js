@@ -163,7 +163,7 @@ test('early aircraft HP grows gradually rather than doubling after the first wav
   assert.ok(later.hp > second.hp);
 });
 
-test('missing the first power drop guarantees a collectable power by the third wave', () => {
+test('missing the first power drop guarantees a collectable power by the second wave', () => {
   const game = new Game({ random: () => GAME.wave.dropChance.power +
     GAME.wave.dropChance.homing + GAME.wave.dropChance.shield / 2 });
   game.start();
@@ -172,7 +172,6 @@ test('missing the first power drop guarantees a collectable power by the third w
   assert.equal(game.pickups.some(pickup => pickup.active && pickup.type === 'power'), true);
   assert.equal(game.player.level, 1, 'a dropped but uncollected upgrade is not a successful pickup');
   game.startWave(2);
-  game.startWave(3);
   game._drop('life', game.player.x, GAME.wave.baseY, true);
   for (let n = 1; n < GAME.pickupCap; n++)
     game._drop('shield', game.player.x, GAME.wave.baseY, true);
@@ -194,7 +193,7 @@ test('guaranteed drops do not grow the pickup pool even when every slot holds a 
   assert.equal(game.pickups.filter(pickup => pickup.active && pickup.type === 'power').length, 1);
 });
 
-test('collecting power resets the three-wave guarantee, including after a new run', () => {
+test('collecting power resets the two-wave guarantee, including after a new run', () => {
   const game = new Game({ random: () => GAME.wave.dropChance.power +
     GAME.wave.dropChance.homing + GAME.wave.dropChance.shield / 2 });
   game.start();
@@ -204,14 +203,14 @@ test('collecting power resets the three-wave guarantee, including after a new ru
   game._resolveCollisions();
   assert.equal(game.player.level, 2);
   game.startWave(4);
-  game.startWave(5);
   assert.deepEqual(killForDrop(game), ['shield']);
-  game.startWave(5);
+  game.startWave(4);
   assert.deepEqual(killForDrop(game), ['shield'], 'restarting the current wave must not count twice');
-  game.startWave(6);
+  game.startWave(5);
   assert.deepEqual(killForDrop(game), ['power']);
   game.start();
   game._kill(game._spawnEnemy('E1', 180, 120));
+  game.collect('power');
   game.startWave(2);
   assert.deepEqual(killForDrop(game), ['shield'], 'a new run resets prior missed-wave history');
   game.startWave(3);
@@ -230,12 +229,30 @@ test('power pity pauses at maximum firepower and returns after losing a level', 
   game.damagePlayer(100, { obstacle: true });
   advance(game, GAME.player.deathDuration + GAME.step);
   assert.equal(game.continueChallenge(), true);
-  for (const wave of [7, 8]) {
-    game.startWave(wave);
-    assert.deepEqual(killForDrop(game), ['shield']);
-  }
-  game.startWave(9);
+  game.startWave(7);
+  assert.deepEqual(killForDrop(game), ['shield']);
+  game.startWave(8);
   assert.deepEqual(killForDrop(game), ['power']);
+});
+
+test('only nearby power pickups attract and still require contact to upgrade', () => {
+  const game = makeGame();
+  const { x, y } = game.player;
+  game._drop('power', x + 100, y, true);
+  game._drop('shield', x + 100, y, true);
+  game._drop('power', x + GAME.powerAttractRadius + 1, y, true);
+  game._movePickups(0.5);
+  assert.equal(game.pickups[0].x, x + 40);
+  assert.equal(game.pickups[0].y, y);
+  assert.equal(game.pickups[1].x, x + 100);
+  assert.equal(game.pickups[1].y, y + GAME.pickupSpeed * 0.5);
+  assert.equal(game.pickups[2].x, x + GAME.powerAttractRadius + 1);
+  game._resolveCollisions();
+  assert.equal(game.player.level, 1);
+  game._movePickups(0.5);
+  game._resolveCollisions();
+  assert.equal(game.player.level, 2);
+  assert.equal(game.pickups[0].active, false);
 });
 
 test('power pity survives a boss-only wave without replacing the boss heal or low-life rescue', () => {

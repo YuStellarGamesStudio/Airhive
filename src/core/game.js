@@ -585,7 +585,17 @@ export class Game {
   _movePickups(dt) {
     for (const pickup of this.pickups) {
       if (!pickup.active) continue;
-      pickup.y += GAME.pickupSpeed * dt;
+      const dx = this.player.x - pickup.x;
+      const dy = this.player.y - pickup.y;
+      const distanceSquared = dx * dx + dy * dy;
+      if (pickup.type === 'power' && distanceSquared <= GAME.powerAttractRadius ** 2) {
+        const distance = Math.sqrt(distanceSquared);
+        const fraction = distance > 0 ? Math.min(1, GAME.powerAttractSpeed * dt / distance) : 0;
+        pickup.x += dx * fraction;
+        pickup.y += dy * fraction;
+      } else {
+        pickup.y += GAME.pickupSpeed * dt;
+      }
       if (pickup.y > GAME.height + pickup.h) pickup.active = false;
     }
   }

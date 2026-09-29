@@ -5,21 +5,21 @@ A browser-based fixed-turret air-combat arcade game. No accounts, CDN, or runtim
 ## English
 Move with **← / →** or **A / D**, drag horizontally on touchscreens, or use the on-screen arrows. All weapons fire automatically. **P / Esc** or the pause button freezes combat. Collect upgrades, homing missiles, shields, bombs, extra lives, and repair kits. Enemy attacks reduce HP; **colliding with wreckage costs a life, even with a shield**. Every tenth wave brings a boss. Keep your combo to multiply your score, then enter a three-character callsign.
 
-Weapons grow through ten tiers: spread fire, rapid fire, piercing rounds, built-in homing missiles, plasma blasts, rail rounds, and the seven-way Nova barrage. Enemy durability and attack pressure now grow more gradually. Below maximum firepower, entering three waves without collecting a power-up guarantees that wave's drop is power; missed pickups do not reset this protection. Repair kits are more common, and lethal wreckage begins at wave 5 with a longer warning. Enemy missiles keep their launch heading; only player weapons can home. After a death warning and explosion, choose **Continue challenge** to resume the current wave with remaining lives, or **Restart** from wave 1. With no lives left, the run ends; continuing is not allowed.
+Weapons grow through ten tiers: spread fire, rapid fire, piercing rounds, built-in homing missiles, plasma blasts, rail rounds, and the seven-way Nova barrage. Enemy durability and attack pressure grow gradually. Power has a 50% base chance per wave; below maximum firepower, entering two waves without collecting power guarantees a power drop. Missed pickups do not reset protection. Power pickups gently attract within 140px, but still require contact. Repair kits are more common, and lethal wreckage begins at wave 5 with a longer warning. Enemy missiles keep their launch heading; only player weapons can home. After a death warning and explosion, choose **Continue challenge** to resume the current wave with remaining lives, or **Restart** from wave 1. With no lives left, the run ends; continuing is not allowed.
 
 Switch language or adjust independent music/effects controls without restarting combat. Scores and settings stay on this device. Export JSON or a save code; imports show a preview and back up your previous save before replacement.
 
 ## 繁體中文
 以 **← / →** 或 **A / D** 左右移動；觸控螢幕橫向拖曳，亦可使用畫面方向鍵。所有武器自動開火。**P / Esc** 或暫停鈕凍結戰鬥。接取火力、追蹤彈、護盾、炸彈、加命與補血；敵方攻擊扣 HP，**撞到殘骸會直接失去一條命，護盾也無效**。每十波出現 Boss，保持 COMBO 可增加分數，結算輸入三字元代號。
 
-武器共十階，逐步解鎖扇形、速射、穿甲、內建追蹤彈、電漿爆破、磁軌與七向新星彈幕。敵機耐久與攻擊壓力改為漸進成長；未滿級時，連續進入三波都沒拾取火力，該波道具保底改為火力，漏接不重置。補血更常見，致命殘骸延至第 5 波並延長預警。所有敵方飛彈發射後不追蹤，只有玩家可使用追蹤武器。死亡提示與爆機特效後，可選 **繼續挑戰** 接續目前波次，或 **重新開始** 回到第 1 波；殘機耗盡後結算，不能續關。
+武器共十階，逐步解鎖扇形、速射、穿甲、內建追蹤彈、電漿爆破、磁軌與七向新星彈幕。敵機耐久與攻擊壓力漸進成長；火力基礎每波掉率 50%，未滿級時連續進入兩波沒拾取火力便保底掉落，漏接不重置。火力道具在 140px 內緩慢吸附，仍需接觸。補血更常見，致命殘骸延至第 5 波並延長預警。所有敵方飛彈發射後不追蹤，只有玩家可使用追蹤武器。死亡提示與爆機特效後，可選 **繼續挑戰** 接續目前波次，或 **重新開始** 回到第 1 波；殘機耗盡後結算，不能續關。
 
 語系與音樂／音效設定可隨時切換，不重啟遊戲。紀錄保存在本機，可匯出 JSON 或存檔碼；匯入會先預覽並備份舊檔。
 
 ## 日本語
 **← / →** または **A / D** で左右に移動します。タッチ画面では横にドラッグするか、画面の矢印を使います。武器は自動発射。**P / Esc** または一時停止ボタンで戦闘を停止できます。強化・追尾弾・シールド・爆弾・残機・回復を回収してください。敵の攻撃は HP を減らしますが、**障害物への衝突はシールドがあっても残機を失います**。10 ウェーブごとにボスが登場。コンボでスコアを伸ばし、終了時に3文字のコールサインを登録します。
 
-武器は全10段階。扇状射撃、連射、貫通弾、内蔵追尾ミサイル、プラズマ爆発、レール弾、7方向ノヴァ弾幕へ強化されます。敵の耐久力と攻撃圧力の上昇を緩やかにしました。最大火力未満で強化を回収せずに3ウェーブへ進むと、そのウェーブのドロップは強化になります。取り逃しても保証は解除されません。回復が増え、致命的な残骸は第5ウェーブから、より長い警告付きで登場します。敵のミサイルは発射後に追尾せず、追尾武器はプレイヤーのみ使用できます。撃墜の通知と爆発後、残機があれば **挑戦を続ける** か **最初からやり直す** を選べます。残機が尽きると終了し、コンティニューはできません。
+武器は全10段階。扇状射撃、連射、貫通弾、内蔵追尾ミサイル、プラズマ爆発、レール弾、7方向ノヴァ弾幕へ強化されます。敵の耐久力と攻撃圧力は緩やかに上昇します。強化の基本ドロップ率は各ウェーブ50%。最大火力未満で回収せずに2ウェーブへ進むと強化が保証され、取り逃しても解除されません。強化アイテムは140px以内でゆっくり引き寄せられますが、接触が必要です。回復が増え、致命的な残骸は第5ウェーブから、より長い警告付きで登場します。敵のミサイルは発射後に追尾せず、追尾武器はプレイヤーのみ使用できます。撃墜の通知と爆発後、残機があれば **挑戦を続ける** か **最初からやり直す** を選べます。残機が尽きると終了し、コンティニューはできません。
 
 言語・BGM・効果音はゲームを再起動せず変更できます。記録は端末内に保存されます。JSON とセーブコードの書き出しに対応。読み込みはプレビューと旧データのバックアップ後に実行されます。
 
